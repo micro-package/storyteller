@@ -1,0 +1,10 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "modulePathIgnorePatterns": [".dist", ".dev"],
+  "globals": {
+    "ts-jest": {
+      "isolatedModules": true
+    }
+  }
+}
