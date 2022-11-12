@@ -1,6 +1,6 @@
 {
   "name": "@micro-package/storyteller",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "private": true,
   "engines": {
     "npm": "8.19.3",
@@ -18,8 +18,8 @@
   "author": "Łukasz Klejszta",
   "license": "UNLICENSED",
   "dependencies": {
-    "@micro-package/common": "1.0.4",
-    "@micro-package/container": "1.0.6",
+    "@micro-package/common": "1.0.5",
+    "@micro-package/container": "1.0.7",
     "lodash": "4.17.21",
     "husky": "^7.0.4",
     "@commitlint/cli": "16.2.1",
