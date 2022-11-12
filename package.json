@@ -7,6 +7,7 @@
     "node": ">=12"
   },
   "scripts": {
+    "pre4pub": "./scripts/prepare-for-publishing.sh",
     "build": "./node_modules/.bin/tsc --project ./tsconfig.build.json",
     "dev": "./node_modules/.bin/tsc --project ./tsconfig.json --watch",
     "test-lint": "./node_modules/.bin/eslint -c ./eslint.json --ext .ts ./",
