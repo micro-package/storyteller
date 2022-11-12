@@ -139,7 +139,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
               throw error;
             } finally {
               if (
-                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosCreatedAmount ===
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosStartedAmount ===
                 valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosErroredAmount +
                   valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosFinishedAmount
               ) {
