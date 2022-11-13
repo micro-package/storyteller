@@ -46,7 +46,6 @@ export const storytellerPlugin = <TStepName extends string>(config: {
     actions: {
       storytellerStep: (valueObject: StorytellerValueObject<TStepName>) => (step) => {
         const stepReference = { ...step, status: StorytellerStepStatus.created };
-        logger.plugin(STORYTELLER_PLUG, `step created ${step.name}`);
         const stepHandler = async (prevStepPromise: Promise<any>) => {
           await prevStepPromise;
           valueObject.getPlugin(STORYTELLER_PLUG).state.steps.push(stepReference);
@@ -138,13 +137,16 @@ export const storytellerPlugin = <TStepName extends string>(config: {
               await valueObject.runHooks({ name: StorytellerHookName.scenarioErrored, payload: { error } });
               throw error;
             } finally {
-              if (
-                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosStartedAmount ===
-                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosErroredAmount +
-                  valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosFinishedAmount
-              ) {
-                await valueObject.runHooks({ name: StorytellerHookName.storytellerFinished });
-              }
+              //? This setImmediate makes storyteller to run if condition after the next scenario is triggered or now if no scenario was left to trigger. This way condition is met only if last scenario is finished.
+              setImmediate(async () => {
+                if (
+                  valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosStartedAmount ===
+                  valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosErroredAmount +
+                    valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosFinishedAmount
+                ) {
+                  await valueObject.runHooks({ name: StorytellerHookName.storytellerFinished });
+                }
+              });
             }
           };
         },
