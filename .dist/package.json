@@ -1,6 +1,6 @@
 {
   "name": "@micro-package/storyteller",
-  "version": "1.0.9",
+  "version": "1.0.12",
   "main": "index.js",
   "engines": {
     "node": ">=12"

@@ -1,6 +1,6 @@
 {
   "name": "@micro-package/storyteller",
-  "version": "1.0.9",
+  "version": "1.0.12",
   "private": true,
   "engines": {
     "npm": "8.19.3",
