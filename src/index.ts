@@ -284,6 +284,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
       {
         name: StorytellerHookName.scenarioStarted,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
+          const defaultStates = cloneDeep(valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates);
           valueObject.plugins = valueObject.plugins.map((plugin) => {
             const defaultState = valueObject
               .getPlugin(STORYTELLER_PLUG)
@@ -297,6 +298,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
             }
             return { ...plugin, state: { ...defaultState.state, globalState: plugin.state.globalState } };
           });
+          valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates = defaultStates;
           logger.ascent(
             STORYTELLER_PLUG,
             `scenario started ${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenarioName} - ${
