@@ -1,0 +1,22 @@
+name: Publish
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+jobs:
+  publish-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.16.0
+          registry-url: https://registry.npmjs.org/
+      - name: Installation
+        run: npm run pre4pub
+      - name: Tests
+        run: npm run test-lint && npm run test-types && npm run test
+      - name: Publication
+        run: cd .dist && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN }}
