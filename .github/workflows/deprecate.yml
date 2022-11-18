@@ -1,4 +1,4 @@
-name: Deprecate
+name: deprecate
 
 on:
   workflow_dispatch:

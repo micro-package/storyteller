@@ -9,12 +9,12 @@
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/czlowiek488/system-test.git"
+    "url": "git+https://github.com/micro-package.git"
   },
   "bugs": {
-    "url": "https://github.com/czlowiek488/system-test/issues"
+    "url": "https://github.com/micro-package/issues"
   },
-  "homepage": "https://github.com/czlowiek488/system-test#readme",
+  "homepage": "https://github.com/micro-package#readme",
   "description": "Storyteller plugin for micro-package container",
   "dependencies": {
     "@micro-package/common": "1.0.5",
