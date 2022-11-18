@@ -10,11 +10,9 @@
     "pre4pub": "./scripts/prepare-for-publishing.sh",
     "build": "./node_modules/.bin/tsc --project ./tsconfig.build.json",
     "dev": "./node_modules/.bin/tsc --project ./tsconfig.json --watch",
-    "test-lint": "./node_modules/.bin/eslint -c ./eslint.json --ext .ts ./",
+    "test": "./node_modules/.bin/jest --runInBand --config jest.config.json",
     "test-types": "./node_modules/.bin/tsc --project ./tsconfig.json",
-    "cleanup-dev": "rm -rf .dev",
-    "cleanup-dist": "rm -rf .dist",
-    "cleanup-node_modules": "rm -rf node_modules"
+    "test-lint": "./node_modules/.bin/eslint -c ./eslint.json --ext .ts ./"
   },
   "author": "Łukasz Klejszta",
   "license": "UNLICENSED",
