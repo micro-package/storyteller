@@ -12,7 +12,8 @@
     "dev": "./node_modules/.bin/tsc --project ./tsconfig.json --watch",
     "test": "./node_modules/.bin/jest --runInBand --config jest.config.json",
     "test-types": "./node_modules/.bin/tsc --project ./tsconfig.json",
-    "test-lint": "./node_modules/.bin/eslint -c ./eslint.json --ext .ts ./"
+    "test-lint": "./node_modules/.bin/eslint -c ./eslint.json --ext .ts ./",
+    "prepare": "husky install"
   },
   "author": "Łukasz Klejszta",
   "license": "UNLICENSED",
