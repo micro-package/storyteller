@@ -17,6 +17,4 @@ jobs:
         with:
           node-version: 16.16
           registry-url: https://registry.npmjs.org/
-      - uses: ./.github/actions/authenticate-aws
-      - uses: ./.github/actions/get-aws-secrets
       - uses: ./.github/actions/execute-tests
