@@ -1,4 +1,5 @@
 name: Deprecate
+
 on:
   workflow_dispatch:
    inputs:
@@ -10,15 +11,20 @@ on:
         description: "A reason why those versions must be marked as deprecated - e.g. critical bug fixed in v0.2.3\nIf left empty it will un deprecate version"
         required: false
         type: string
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deprecate-package-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: 12
+          node-version: 16.16
           registry-url: https://registry.npmjs.org/
-      - name: Deprecate
+      - name: deprecate
         run: npm deprecate @${{ github.repository }}@${{ github.event.inputs.versionRange }} "${{ github.event.inputs.reasonMessage }}"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN }}
