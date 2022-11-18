@@ -20,10 +20,8 @@ jobs:
   deprecate-package-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16.16
-          registry-url: https://registry.npmjs.org/
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
       - name: deprecate
         run: npm deprecate @${{ github.repository }}@${{ github.event.inputs.versionRange }} "${{ github.event.inputs.reasonMessage }}"
         env:
