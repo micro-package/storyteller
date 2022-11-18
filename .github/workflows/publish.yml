@@ -21,6 +21,8 @@ jobs:
       - uses: ./.github/actions/execute-tests
       - name: prepare-for-publication
         run: npm run pre4pub
+      - uses: ./.github/actions/authenticate-aws
+      - uses: ./.github/actions/get-aws-secrets
       - name: publication
         run: cd .dist && npm publish --access public
         env:
