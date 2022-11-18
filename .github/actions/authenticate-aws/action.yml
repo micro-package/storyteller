@@ -1,0 +1,11 @@
+name: authenticate-aws
+description: Authenticate AWS
+
+runs:
+  using: composite
+  steps:
+    - name: configure-aws-credentials
+      uses: aws-actions/configure-aws-credentials@v1-node16
+      with:
+        role-to-assume: arn:aws:iam::662873414964:role/githubCiCdAccess
+        aws-region: eu-central-1
