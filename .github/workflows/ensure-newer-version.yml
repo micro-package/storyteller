@@ -1,4 +1,4 @@
-name: validate-local-version
+name: ensure-newer-version
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  validate-local-version:
+  ensure-newer-version:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -45,17 +45,22 @@ jobs:
             else echo "LOCAL VERSION IS NOT READY FOR UPDATE" && echo "IS_READY=false" >> $GITHUB_OUTPUT; 
           fi
       - name: bump-version
-        if: steps.set-version-variables.outputs.IS_READY == 'false'
+        if: steps.validate-version-variables.outputs.IS_READY == 'false'
         run: |
-          npm version patch
+          git config --global user.email "lukasz.klejszta@tsh.io"
+          git config --global user.name "lukasz.klejszta"
+          git clone git@github.com:micro-package/storyteller.git
+          cd storyteller
+          echo "checkout"
+          git checkout -b ${{ github.head_ref }}
           cd .dist
-          npm version patch
+          export NEW_VERSION=`npm version patch --no-git-tag-version`
           cd ..
           npm run pre4pub
-      - if: steps.set-version-variables.outputs.IS_READY == 'false'
-        uses: EndBug/add-and-commit@v9
-        with:
-          add: 'package.json package-lock.json .dist/package.json .dist/package-lock.json'
-          committer_name: Github CI/CD
-          message: 'commit message'
+          echo "add"
+          git add package.json package-lock.json .dist/package.json .dist/package-lock.json
+          echo "commit"
+          git commit --no-verify --message "feat(Waterfall): automatic version bump to $NEW_VERSION"
+          echo "push"
+          git push
         
