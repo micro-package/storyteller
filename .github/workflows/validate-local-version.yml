@@ -19,6 +19,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: install-deps
-        run: sudo apt-get install jq --force-yes && curl https://gist.githubusercontent.com/Ariel-Rodriguez/9e3c2163f4644d7a389759b224bfe7f3/raw/816453441da56058b73af5812db6217fb71897d2/semver.sh >> semver.sh && chmod +x semver.sh
-      - name: validate-version-vector
-        run: ONLINE_VERSION=`curl https://registry.npmjs.org/@micro-package/storyteller | jq -r '."dist-tags".latest'` && LOCAL_VERSION=`cat ./.dist/package.json | jq -r '.version'` && VERSION_VECTOR=`./semver.sh $LOCAL_VERSION $ONLINE_VERSION` && if [ "$VERSION_VECTOR" = 1 ]; then printf "LOCAL VERSION READY TO UPGRADE ONLINE VERSION\n\nONLINE_VERSION=$ONLINE_VERSION\nLOCAL_VERSION=$LOCAL_VERSION\nVERSION_VECTOR=$VERSION_VECTOR\n"; else printf "LOCAL VERSION IS NOT READY FOR UPDATE\n\nONLINE_VERSION=$ONLINE_VERSION\nLOCAL_VERSION=$LOCAL_VERSION\nVERSION_VECTOR=$VERSION_VECTOR\n" && exit 1; fi 
+        run: |
+          sudo apt-get install jq --force-yes
+          curl https://gist.githubusercontent.com/Ariel-Rodriguez/9e3c2163f4644d7a389759b224bfe7f3/raw/816453441da56058b73af5812db6217fb71897d2/semver.sh >> semver.sh
+          chmod +x semver.sh
+      - name: set-version-variables
+        id: set-version-variables
+        run: |
+          ONLINE_VERSION=`curl https://registry.npmjs.org/@micro-package/storyteller | jq -r '."dist-tags".latest'`
+          LOCAL_VERSION=`cat ./.dist/package.json | jq -r '.version'`
+          echo "ONLINE_VERSION=$ONLINE_VERSION" >> $GITHUB_OUTPUT
+          echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_OUTPUT
+      - name: show-version-variables
+        run: |
+          echo "ONLINE_VERSION=${{ steps.set-version-variables.outputs.ONLINE_VERSION }}"
+          echo "LOCAL_VERSION=${{ steps.set-version-variables.outputs.LOCAL_VERSION }}"
+          echo "VERSION_VECTOR=`./semver.sh ${{ steps.set-version-variables.outputs.LOCAL_VERSION }} ${{ steps.set-version-variables.outputs.ONLINE_VERSION }}`"
+      - name: validate-version-variables
+        run: |
+          VERSION_VECTOR=`./semver.sh ${{ steps.set-version-variables.outputs.LOCAL_VERSION }} ${{ steps.set-version-variables.outputs.ONLINE_VERSION }}`
+          rm ./semver.sh
+          if [ $VERSION_VECTOR = 1 ]; 
+            then echo "LOCAL VERSION READY TO UPGRADE ONLINE VERSION" && echo "IS_READY=true" >> $GITHUB_OUTPUT; 
+            else echo "LOCAL VERSION IS NOT READY FOR UPDATE" && echo "IS_READY=false" >> $GITHUB_OUTPUT; 
+          fi
