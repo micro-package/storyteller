@@ -36,6 +36,7 @@ jobs:
           echo "LOCAL_VERSION=${{ steps.set-version-variables.outputs.LOCAL_VERSION }}"
           echo "VERSION_VECTOR=`./semver.sh ${{ steps.set-version-variables.outputs.LOCAL_VERSION }} ${{ steps.set-version-variables.outputs.ONLINE_VERSION }}`"
       - name: validate-version-variables
+        id: validate-version-variables 
         run: |
           VERSION_VECTOR=`./semver.sh ${{ steps.set-version-variables.outputs.LOCAL_VERSION }} ${{ steps.set-version-variables.outputs.ONLINE_VERSION }}`
           rm ./semver.sh
@@ -43,3 +44,18 @@ jobs:
             then echo "LOCAL VERSION READY TO UPGRADE ONLINE VERSION" && echo "IS_READY=true" >> $GITHUB_OUTPUT; 
             else echo "LOCAL VERSION IS NOT READY FOR UPDATE" && echo "IS_READY=false" >> $GITHUB_OUTPUT; 
           fi
+      - name: bump-version
+        if: steps.set-version-variables.outputs.IS_READY == 'false'
+        run: |
+          npm version patch
+          cd .dist
+          npm version patch
+          cd ..
+          npm run pre4pub
+      - if: steps.set-version-variables.outputs.IS_READY == 'false'
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'package.json package-lock.json .dist/package.json .dist/package-lock.json'
+          committer_name: Github CI/CD
+          message: 'commit message'
+        
