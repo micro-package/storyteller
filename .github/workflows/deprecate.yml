@@ -25,4 +25,4 @@ jobs:
       - name: deprecate
         run: npm deprecate @${{ github.repository }}@${{ github.event.inputs.versionRange }} "${{ github.event.inputs.reasonMessage }}"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ env.MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN }}

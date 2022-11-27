@@ -41,26 +41,26 @@ jobs:
           VERSION_VECTOR=`./semver.sh ${{ steps.set-version-variables.outputs.LOCAL_VERSION }} ${{ steps.set-version-variables.outputs.ONLINE_VERSION }}`
           rm ./semver.sh
           if [ $VERSION_VECTOR = 1 ]; 
-            then echo "LOCAL VERSION READY TO UPGRADE ONLINE VERSION" && echo "IS_READY=true" >> $GITHUB_OUTPUT; 
-            else echo "LOCAL VERSION IS NOT READY FOR UPDATE" && echo "IS_READY=false" >> $GITHUB_OUTPUT; 
+            then echo "Package version in pull request is greater than one published version - merge to master allowed" && echo "IS_READY=true" >> $GITHUB_OUTPUT; 
+            else echo "Package version in pull request cannot update published version - merge to master disallowed" && echo "IS_READY=false" >> $GITHUB_OUTPUT && exit 1; 
           fi
-      - name: bump-version
-        if: steps.validate-version-variables.outputs.IS_READY == 'false'
-        run: |
-          git config --global user.email "lukasz.klejszta@tsh.io"
-          git config --global user.name "lukasz.klejszta"
-          git clone git@github.com:micro-package/storyteller.git
-          cd storyteller
-          echo "checkout"
-          git checkout -b ${{ github.head_ref }}
-          cd .dist
-          export NEW_VERSION=`npm version patch --no-git-tag-version`
-          cd ..
-          npm run pre4pub
-          echo "add"
-          git add package.json package-lock.json .dist/package.json .dist/package-lock.json
-          echo "commit"
-          git commit --no-verify --message "feat(Waterfall): automatic version bump to $NEW_VERSION"
-          echo "push"
-          git push
+      # - name: bump-version
+      #   if: steps.validate-version-variables.outputs.IS_READY == 'false'
+      #   run: |
+      #     git config --global user.email "lukasz.klejszta@tsh.io"
+      #     git config --global user.name "lukasz.klejszta"
+      #     git clone git@github.com:micro-package/storyteller.git
+      #     cd storyteller
+      #     echo "checkout"
+      #     git checkout -b ${{ github.head_ref }}
+      #     cd .dist
+      #     export NEW_VERSION=`npm version patch --no-git-tag-version`
+      #     cd ..
+      #     npm run pre4pub
+      #     echo "add"
+      #     git add package.json package-lock.json .dist/package.json .dist/package-lock.json
+      #     echo "commit"
+      #     git commit --no-verify --message "feat(Waterfall): automatic version bump to $NEW_VERSION"
+      #     echo "push"
+      #     git push
         
