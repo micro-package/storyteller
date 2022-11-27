@@ -2,22 +2,84 @@ name: merge-and-publish-new-version
 
 on:
   workflow_dispatch:
+  pull_request:
+    types:
+      - "opened"
+      - "reopened"
+      - "edited"
+      - "synchronize"
 
-permissions:
-  id-token: write
-  contents: read
+permissions: write-all
 
 jobs:
   merge-and-publish-new-version:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+    steps:      
+      - id: checkout-1
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.16
+          registry-url: https://registry.npmjs.org/
+      - name: install-npm
+        run: npm i -g npm@8.19.3
+        shell: bash
+      - name: configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: arn:aws:iam::662873414964:role/githubCiCdAccess
+          aws-region: eu-central-1
+      - name: Step name
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |
+            MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN, MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN
+            MICRO_PACKAGE_GITHUB_ACTIONS_DEPLOY_KEY_PRIVATE, MICRO_PACKAGE_GITHUB_ACTIONS_DEPLOY_KEY_PRIVATE
+      - name: install-deps
+        run: |
+          sudo apt-get install jq --force-yes
+          LOCAL_VERSION=`cat ./.dist/package.json | jq -r '.version'`
+          echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_OUTPUT
+      - id: checkout-2
+        uses: actions/checkout@v3
         with:
           ref: master
-          ssh-key: "${{ env.MICRO_PACKAGE_GITHUB_ACTIONS_DEPLOY_KEY_PRIVATE }}"
-      - name: check-version
+      - name: patch version
+        id: get-version
         run: |
-          git rev-parse --abbrev-ref HEAD
+          cd .dist
+          NEW_VERSION=`npm version patch --no-git-tag-version`
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+          cd ..
+          npm run pre4pub
+      - name: commit and pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git checkout -b "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}"
+          git add .
+          git -c author.name=Waterfall -c author.email=waterfall@micro-package.io -c committer.name=Waterfall -c committer.email=waterfall@micro-package.io commit -m 'feat(waterfall): patch to version ${{ steps.get-version.outputs.NEW_VERSION }}' --no-verify
+          git push --set-upstream origin "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}" --force
+          gh pr create --base master --body "Automated changes made by \"Waterfall\" - ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --head "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}" --title "[Waterfall]: patch to version ${{ steps.get-version.outputs.NEW_VERSION }}"
+      # - uses: stefanzweifel/git-auto-commit-action@v4
+      #   with:
+      #     commit_message: "feat(waterfall): patch to version ${{ steps.get-version.outputs.NEW_VERSION }}"
+      #     create_branch: true
+      #     branch: "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}"
+      #     commit_user_name: Waterfall
+      #     commit_user_email: waterfall@micro-package.io
+      #     commit_author: Author <actions@github.com>
+      #     commit_options: '--no-verify'
+      # - uses: peter-evans/create-pull-request@v4
+      #   with:
+      #     commit-message: "feat(waterfall): patch to version ${{ steps.get-version.outputs.NEW_VERSION }}"
+      #     branch: "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}"
+      #     # delete-branch: true
+      #     base: master
+      #     title: "[Waterfall]: patch to version ${{ steps.get-version.outputs.NEW_VERSION }}"
+      #     body: "Automated changes made by \"Waterfall\""
+      #     committer: Waterfall <waterfall@micro-package.io>
+      #     author: Waterfall <waterfall@micro-package.io>
       # - name: automerge
       #   uses: "pascalgn/automerge-action@v0.15.5"
       #   env:

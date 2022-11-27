@@ -1,4 +1,4 @@
-name: ensure-newer-version
+name: is-package-version-updated
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  ensure-newer-version:
+  is-package-version-updated:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
