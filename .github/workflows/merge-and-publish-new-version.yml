@@ -61,38 +61,4 @@ jobs:
           git -c author.name=Waterfall -c author.email=waterfall@micro-package.io -c committer.name=Waterfall -c committer.email=waterfall@micro-package.io commit -m 'feat(waterfall): patch to version ${{ steps.get-version.outputs.NEW_VERSION }}' --no-verify
           git push --set-upstream origin "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}" --force
           gh pr create --base master --body "Automated changes made by \"Waterfall\" - ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" --head "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}" --title "[Waterfall]: patch to version ${{ steps.get-version.outputs.NEW_VERSION }}"
-      # - uses: stefanzweifel/git-auto-commit-action@v4
-      #   with:
-      #     commit_message: "feat(waterfall): patch to version ${{ steps.get-version.outputs.NEW_VERSION }}"
-      #     create_branch: true
-      #     branch: "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}"
-      #     commit_user_name: Waterfall
-      #     commit_user_email: waterfall@micro-package.io
-      #     commit_author: Author <actions@github.com>
-      #     commit_options: '--no-verify'
-      # - uses: peter-evans/create-pull-request@v4
-      #   with:
-      #     commit-message: "feat(waterfall): patch to version ${{ steps.get-version.outputs.NEW_VERSION }}"
-      #     branch: "waterfall/patch-${{ steps.get-version.outputs.NEW_VERSION }}"
-      #     # delete-branch: true
-      #     base: master
-      #     title: "[Waterfall]: patch to version ${{ steps.get-version.outputs.NEW_VERSION }}"
-      #     body: "Automated changes made by \"Waterfall\""
-      #     committer: Waterfall <waterfall@micro-package.io>
-      #     author: Waterfall <waterfall@micro-package.io>
-      # - name: automerge
-      #   uses: "pascalgn/automerge-action@v0.15.5"
-      #   env:
-      #     GITHUB_TOKEN: "${{ env.MICRO_PACKAGE_GITHUB_ACTIONS_DEPLOY_KEY_PRIVATE }}"
-      #     MERGE_LABELS: "automerge,!work in progress"
-      #     MERGE_REMOVE_LABELS: "automerge"
-      #     MERGE_METHOD: "squash"
-      #     MERGE_COMMIT_MESSAGE: "pull-request-description"
-      #     MERGE_FORKS: "false"
-      #     MERGE_RETRIES: "6"
-      #     MERGE_RETRY_SLEEP: "10000"
-      #     MERGE_REQUIRED_APPROVALS: "0"
-      #     UPDATE_LABELS: ""
-      #     UPDATE_METHOD: "rebase"
-      #     PULL_REQUEST: "1234"
         
