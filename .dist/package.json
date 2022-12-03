@@ -9,12 +9,12 @@
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/micro-package.git"
+    "url": "git+https://github.com/micro-package/storyteller.git"
   },
   "bugs": {
-    "url": "https://github.com/micro-package/issues"
+    "url": "https://github.com/micro-package/storyteller/issues"
   },
-  "homepage": "https://github.com/micro-package#readme",
+  "homepage": "https://github.com/micro-package/storyteller#readme",
   "description": "Storyteller plugin for micro-package container",
   "dependencies": {
     "@micro-package/common": "1.0.5",
