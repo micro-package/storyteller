@@ -1,5 +1,5 @@
-name: execute-tests
-description: Execute tests
+name: perform-tests
+description: Perform tests
 
 runs:
   using: composite

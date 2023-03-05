@@ -1,14 +1,14 @@
-import { errorValueObject } from "@micro-package/common/error";
-import type { UnionToIntersection } from "@micro-package/common/types";
+import { errorValueObject } from "../common/error";
+import type { UnionToIntersection } from "../common/types";
 import type { Plugin, PluginAction, PluginName } from "./plugin"; //! Figure out why vs-code sees this as unused
 import type { HookDefinition, PrimaryHookDefinition } from "./hook";
 import { PrimaryHookName as PrimaryHookName } from "./hook";
 import { cloneDeep } from "lodash";
-import { applyProxies } from "@micro-package/common/proxy/common";
-import { errorDecoratorProxyHandler } from "@micro-package/common/proxy/error-decorator";
-import { loggerProxyHandler } from "@micro-package/common/proxy/logger";
-import { LoggingLevel } from "@micro-package/common/enum";
-import { winstonLogger } from "@micro-package/common/logger";
+import { applyProxies } from "../common/proxy/common";
+import { errorDecoratorProxyHandler } from "../common/proxy/error-decorator";
+import { loggerProxyHandler } from "../common/proxy/logger";
+import { LoggingLevel } from "../common/enum";
+import { winstonLogger } from "../common/logger";
 
 export enum Status {
   created = "created",

@@ -1,5 +1,5 @@
 import { pipe } from "ts-pipe-compose";
-import { falso } from "@micro-package/common/falso";
+import { falso } from "../common/falso";
 import type { HookHandler } from "./hook";
 import type { Plugin } from "./plugin";
 import { createPlugin } from "./plugin";

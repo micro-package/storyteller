@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 16.16
           registry-url: https://registry.npmjs.org/
-      - uses: ./.github/actions/execute-tests
+      - uses: ./.github/actions/perform-tests
       - name: prepare-for-publication
         run: npm run pre4pub
       - uses: ./.github/actions/authenticate-aws

@@ -5,9 +5,9 @@ import { secureJsonStringify } from "./parser/secure-json";
 import { LoggingLevel, LoggingSource } from "./enum";
 import type { Chalk } from "chalk";
 import chalk from "chalk";
-// import { EXPRESS_PLUG } from "../../express/src/name";
-// import { AXIOS_PLUG } from "../../axios/src/name";
-// import { STORYTELLER_PLUG } from "@micro-package/storyteller/.dist/name";
+import { EXPRESS_PLUG } from "../plugins/express/name";
+import { AXIOS_PLUG } from "../plugins/axios/name";
+import { STORYTELLER_PLUG } from "../plugins/storyteller/name";
 global.console = require("console");
 
 const logLevelColorizer: { [key in LoggingLevel]: Chalk } = {
@@ -18,9 +18,9 @@ const logLevelColorizer: { [key in LoggingLevel]: Chalk } = {
   [LoggingLevel.ascent]: chalk.blue,
 };
 const pluginNameColorizer: { [key: string]: Chalk } = {
-  // [EXPRESS_PLUG]: chalk.magenta,
-  // [AXIOS_PLUG]: chalk.cyan,
-  // [STORYTELLER_PLUG]: chalk.italic,
+  [EXPRESS_PLUG]: chalk.magenta,
+  [AXIOS_PLUG]: chalk.cyan,
+  [STORYTELLER_PLUG]: chalk.italic,
 };
 
 const maxLoggingLevelNameLength =

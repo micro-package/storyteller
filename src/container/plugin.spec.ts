@@ -1,11 +1,11 @@
 import { pipe } from "ts-pipe-compose";
-import { falso } from "@micro-package/common/falso";
 import type { Plugin, PluginAction } from "./plugin";
 import { createPlugin } from "./plugin";
 import type { HookHandler, HookDefinition } from "./hook";
 import type { Status, ValueObject } from "./value-object";
 import { createValueObject, forgeValueObject } from "./value-object";
 import { expect } from "@jest/globals";
+import { falso } from "../common/falso";
 enum TestHookName {
   testHook = "testHook",
   testHook1 = "testHook1",

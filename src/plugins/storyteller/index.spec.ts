@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
-import { compose, storytellerHelper, storytellerPlugin } from ".";
+import { pipe } from "ts-pipe-compose";
+import { storytellerHelper, storytellerPlugin } from ".";
 import { createValueObject, forgeValueObject } from "../../container/value-object";
 
-const testFramework = compose(
+const testFramework = pipe(
   createValueObject(),
   storytellerPlugin({}),
   forgeValueObject({ debug: false }),

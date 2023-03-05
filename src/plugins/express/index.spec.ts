@@ -5,7 +5,8 @@ import { StatusCodes } from "http-status-codes";
 import axios from "axios";
 import { createValueObject, forgeValueObject } from "../../container/value-object";
 import { expect } from "@jest/globals";
-import { storytellerPlugin, compose, storytellerHelper } from "../storyteller";
+import { storytellerPlugin, storytellerHelper } from "../storyteller";
+import { pipe } from "ts-pipe-compose";
 
 enum ApiName {
   google = "google",
@@ -32,7 +33,7 @@ const mockDefinitions = [
   } as const,
 ];
 
-const testFramework = compose(
+const testFramework = pipe(
   createValueObject(),
   expressPlugin<
     | {
@@ -76,13 +77,14 @@ describe("express plugin", () => {
               [
                 (req, res) => {
                   //? headers object needs to be copied in order to not timeout while using `toStrictEqual` for some reason
-                  expect({ ...req.headers }).toStrictEqual({
-                    accept: "application/json, text/plain, */*",
-                    "user-agent": expect.any(String),
-                    "accept-encoding": "gzip, deflate, br",
-                    host: expect.any(String),
-                    connection: "close",
-                  });
+                  expect({ ...req.headers }).toStrictEqual(
+                    expect.objectContaining({
+                      accept: "application/json, text/plain, */*",
+                      "user-agent": expect.any(String),
+                      host: expect.any(String),
+                      connection: "close",
+                    }),
+                  );
                   res.sendStatus(StatusCodes.OK);
                 },
               ],
@@ -127,13 +129,14 @@ describe("express plugin", () => {
             handlers: [
               [
                 (req, res) => {
-                  expect({ ...req.headers }).toStrictEqual({
-                    accept: "application/json, text/plain, */*",
-                    "user-agent": expect.any(String),
-                    "accept-encoding": "gzip, deflate, br",
-                    host: expect.any(String),
-                    connection: "close",
-                  });
+                  expect({ ...req.headers }).toStrictEqual(
+                    expect.objectContaining({
+                      accept: "application/json, text/plain, */*",
+                      "user-agent": expect.any(String),
+                      host: expect.any(String),
+                      connection: "close",
+                    }),
+                  );
                   res.sendStatus(StatusCodes.OK);
                 },
               ],

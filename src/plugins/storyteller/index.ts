@@ -13,7 +13,7 @@ import type {
 } from "./types";
 import { SectionName } from "./types";
 import { StorytellerHookName, StorytellerStepStatus } from "./types";
-import { pipe, pipelineUnary } from "ts-pipe-compose";
+import { pipelineUnary } from "ts-pipe-compose";
 
 export const testRunnerNameGetters: TestRunnerNameGetters[] = [
   //@ts-ignore
@@ -358,5 +358,3 @@ export const storytellerHelper = <TValueObject extends StorytellerValueObject<st
     composeSection: pipelineUnary,
   };
 };
-
-export const compose = pipe;
