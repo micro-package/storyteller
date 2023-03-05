@@ -7,14 +7,14 @@ import type { Status, ValueObject } from "../../container/value-object";
 import type { StorytellerHookDefinition } from "../storyteller/types";
 import type { AXIOS_PLUG } from "./name";
 
-export interface ApiDefinition<TApiName extends string, TEndpointName extends string> {
+export interface AxiosPluginApiDefinition<TApiName extends string, TEndpointName extends string> {
   apiName: TApiName;
   endpointName: TEndpointName;
 }
 
-export type AxiosPluginRequest<TApiDefinition extends ApiDefinition<string, string>> = Pick<
+export type AxiosPluginRequest<TApiDefinition extends AxiosPluginApiDefinition<string, string>> = Pick<
   TApiDefinition,
-  keyof ApiDefinition<string, string>
+  keyof AxiosPluginApiDefinition<string, string>
 > & {
   requestData: any;
   requestHeaders: any;
@@ -22,21 +22,22 @@ export type AxiosPluginRequest<TApiDefinition extends ApiDefinition<string, stri
   responseData: any;
 };
 
-export type AxiosApiDefinition<TApiDefinition extends ApiDefinition<string, string>> = Pick<
+export type AxiosApiDefinition<TApiDefinition extends AxiosPluginApiDefinition<string, string>> = Pick<
   TApiDefinition,
-  keyof ApiDefinition<string, string>
+  keyof AxiosPluginApiDefinition<string, string>
 > & {
   method: HTTPMethod;
   url: string;
 };
 
-export type AxiosPluginResponse<TAxiosPluginRequest extends AxiosPluginRequest<ApiDefinition<string, string>>> =
-  AxiosApiDefinition<TAxiosPluginRequest> & {
-    response: AxiosResponse<
-      TAxiosPluginRequest["responseData"],
-      TAxiosPluginRequest["requestData"] & { headers: TAxiosPluginRequest["requestHeaders"] }
-    >;
-  };
+export type AxiosPluginResponse<
+  TAxiosPluginRequest extends AxiosPluginRequest<AxiosPluginApiDefinition<string, string>>,
+> = AxiosApiDefinition<TAxiosPluginRequest> & {
+  response: AxiosResponse<
+    TAxiosPluginRequest["responseData"],
+    TAxiosPluginRequest["requestData"] & { headers: TAxiosPluginRequest["requestHeaders"] }
+  >;
+};
 
 export enum AxiosHookName {
   axiosRequestStarted = "axiosRequestStarted",
@@ -45,28 +46,30 @@ export enum AxiosHookName {
   axiosRequestErrored = "axiosRequestErrored",
 }
 
-export type AxiosHookDefinition<TAxiosPluginRequest extends AxiosPluginRequest<ApiDefinition<string, string>>> =
+export type AxiosHookDefinition<
+  TAxiosPluginRequest extends AxiosPluginRequest<AxiosPluginApiDefinition<string, string>>,
+> =
   | HookDefinition<
       AxiosHookName.axiosRequestStarted,
-      { apiDefinition: AxiosApiDefinition<ApiDefinition<string, string>> }
+      { apiDefinition: AxiosApiDefinition<AxiosPluginApiDefinition<string, string>> }
     >
   | HookDefinition<
       AxiosHookName.axiosRequestConfigured,
-      { config: AxiosRequestConfig<any>; apiDefinition: AxiosApiDefinition<ApiDefinition<string, string>> }
+      { config: AxiosRequestConfig<any>; apiDefinition: AxiosApiDefinition<AxiosPluginApiDefinition<string, string>> }
     >
   | HookDefinition<AxiosHookName.axiosRequestFinished, AxiosPluginResponse<TAxiosPluginRequest>>
   | HookDefinition<
       AxiosHookName.axiosRequestErrored,
-      { error: Error; apiDefinition: AxiosApiDefinition<ApiDefinition<string, string>> }
+      { error: Error; apiDefinition: AxiosApiDefinition<AxiosPluginApiDefinition<string, string>> }
     >;
 
-export interface AxiosState<TAxiosPluginRequest extends AxiosPluginRequest<ApiDefinition<string, string>>> {
+export interface AxiosState<TAxiosPluginRequest extends AxiosPluginRequest<AxiosPluginApiDefinition<string, string>>> {
   axios: AxiosInstance;
   responses: AxiosPluginResponse<TAxiosPluginRequest>[];
 }
 
 export interface AxiosActions<
-  TAxiosPluginRequest extends AxiosPluginRequest<ApiDefinition<string, string>>,
+  TAxiosPluginRequest extends AxiosPluginRequest<AxiosPluginApiDefinition<string, string>>,
   TAxiosApiDefinition extends AxiosApiDefinition<TAxiosPluginRequest>,
 > extends PluginAction<any, any, any> {
   axiosRequest: <TAxiosEndpointName extends TAxiosPluginRequest["endpointName"]>(payload: {
@@ -102,7 +105,7 @@ export interface AxiosActions<
 }
 
 export interface AxiosPlugin<
-  TAxiosPluginRequest extends AxiosPluginRequest<ApiDefinition<string, string>>,
+  TAxiosPluginRequest extends AxiosPluginRequest<AxiosPluginApiDefinition<string, string>>,
   TAxiosApiDefinition extends AxiosApiDefinition<TAxiosPluginRequest>,
 > extends Plugin<
     typeof AXIOS_PLUG,
@@ -111,7 +114,7 @@ export interface AxiosPlugin<
     AxiosHookDefinition<TAxiosPluginRequest> | StorytellerHookDefinition
   > {}
 export interface AxiosValueObject<
-  TAxiosPluginRequest extends AxiosPluginRequest<ApiDefinition<string, string>>,
+  TAxiosPluginRequest extends AxiosPluginRequest<AxiosPluginApiDefinition<string, string>>,
   TAxiosApiDefinition extends AxiosApiDefinition<TAxiosPluginRequest>,
 > extends ValueObject<
     Status.forged,

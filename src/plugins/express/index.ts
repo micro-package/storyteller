@@ -13,7 +13,7 @@ import { STORYTELLER_PLUG } from "../storyteller/name";
 import type { StorytellerHookDefinition } from "../storyteller/types";
 import { StorytellerHookName } from "../storyteller/types";
 import type {
-  ApiDefinition,
+  ExpressPluginApiDefinition,
   ExpressActions,
   ExpressHookDefinition,
   ExpressMock,
@@ -40,9 +40,11 @@ const errorHandlerMiddleware: ErrorRequestHandler = (error, req, res, _next) => 
   res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(message);
 };
 
-export const expressPlugin = <TExpressMock extends ExpressMock<ApiDefinition<string, string>>>(config: {
+export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>>(config: {
   port: number;
-  mockDefinitions: (TExpressMock extends infer UExpressMock extends ExpressMock<ApiDefinition<string, string>>
+  mockDefinitions: (TExpressMock extends infer UExpressMock extends ExpressMock<
+    ExpressPluginApiDefinition<string, string>
+  >
     ? ExpressMockDefinitions<UExpressMock>
     : never)[];
 }) => {
@@ -143,10 +145,11 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ApiDefinition<str
     hooks: [
       {
         name: StorytellerHookName.arrangeStarted,
-        handler: (valueObject: ExpressValueObject<ExpressMock<ApiDefinition<string, string>>>) => async () => {
-          valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router = Router();
-          logger.plugin(EXPRESS_PLUG, "routes cleared");
-        },
+        handler:
+          (valueObject: ExpressValueObject<ExpressMock<ExpressPluginApiDefinition<string, string>>>) => async () => {
+            valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router = Router();
+            logger.plugin(EXPRESS_PLUG, "routes cleared");
+          },
       },
       {
         name: StorytellerHookName.storytellerCreated,
