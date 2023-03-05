@@ -5,7 +5,7 @@ import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { expect } from "@jest/globals";
 import { createValueObject, forgeValueObject } from "../../container/value-object";
 import { storytellerPlugin, compose, storytellerHelper } from "../storyteller";
-import path from "path";
+
 const { parsed: env } = dotenv.config();
 if (env === undefined) {
   throw Error("Test has missing env variables");

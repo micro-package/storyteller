@@ -77,11 +77,11 @@ describe("express plugin", () => {
                 (req, res) => {
                   //? headers object needs to be copied in order to not timeout while using `toStrictEqual` for some reason
                   expect({ ...req.headers }).toStrictEqual({
-                    accept: 'application/json, text/plain, */*',
-                    'user-agent': expect.any(String),
-                    'accept-encoding': 'gzip, deflate, br',
+                    accept: "application/json, text/plain, */*",
+                    "user-agent": expect.any(String),
+                    "accept-encoding": "gzip, deflate, br",
                     host: expect.any(String),
-                    connection: 'close'
+                    connection: "close",
                   });
                   res.sendStatus(StatusCodes.OK);
                 },
@@ -128,11 +128,11 @@ describe("express plugin", () => {
               [
                 (req, res) => {
                   expect({ ...req.headers }).toStrictEqual({
-                    accept: 'application/json, text/plain, */*',
-                    'user-agent': expect.any(String),
-                    'accept-encoding': 'gzip, deflate, br',
+                    accept: "application/json, text/plain, */*",
+                    "user-agent": expect.any(String),
+                    "accept-encoding": "gzip, deflate, br",
                     host: expect.any(String),
-                    connection: 'close'
+                    connection: "close",
                   });
                   res.sendStatus(StatusCodes.OK);
                 },

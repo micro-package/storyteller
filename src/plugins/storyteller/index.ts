@@ -324,7 +324,9 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
           logger.plugin(
             STORYTELLER_PLUG,
-            `Step appended "${payload.step.name}" - ${valueObject.getPlugin(STORYTELLER_PLUG).state.steps.length} index`,
+            `Step appended "${payload.step.name}" - ${
+              valueObject.getPlugin(STORYTELLER_PLUG).state.steps.length
+            } index`,
           );
         },
       },

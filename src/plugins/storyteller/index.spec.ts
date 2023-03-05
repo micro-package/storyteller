@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import { compose, storytellerHelper, storytellerPlugin } from ".";
-import { inspect } from "util";
 import { createValueObject, forgeValueObject } from "../../container/value-object";
 
 const testFramework = compose(
