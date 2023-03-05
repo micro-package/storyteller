@@ -1,0 +1,29 @@
+version: '3.4'
+services:
+  dynamodb:
+    image:  amazon/dynamodb-local
+    hostname: dynamodb
+    restart: always
+    ports:
+      - 8000:8000
+    command: "-jar DynamoDBLocal.jar -inMemory"
+  postgres:
+    image: postgres:10-alpine
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    networks:
+      - app
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 8088:8088
+    networks:
+      - app
+
+networks:
+  app:

@@ -1,0 +1,12 @@
+name: get-aws-secrets
+description: Get AWS secrets from secret manager
+
+runs:
+  using: composite
+  steps:
+    - name: Step name
+      uses: aws-actions/aws-secretsmanager-get-secrets@v1
+      with:
+        secret-ids: |
+          MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN, MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN
+          MICRO_PACKAGE_GITHUB_ACTIONS_DEPLOY_KEY_PRIVATE, MICRO_PACKAGE_GITHUB_ACTIONS_DEPLOY_KEY_PRIVATE
