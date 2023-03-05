@@ -1,6 +1,5 @@
-import assert from "static-type-assert";
 import { pipe } from "ts-pipe-compose";
-import { falso } from "@micro-package/common/falso";
+import { falso } from "../common/falso";
 import type { HookHandler } from "./hook";
 import type { Plugin } from "./plugin";
 import { createPlugin } from "./plugin";
@@ -9,6 +8,7 @@ import type { Status } from "./value-object";
 import type { ValueObject } from "./value-object";
 import { createValueObject, forgeValueObject } from "./value-object";
 import { expect } from "@jest/globals";
+import { exactType } from "../common/exact-type";
 enum TestHookName {
   testHook = "testHook",
   testHook1 = "testHook1",
@@ -95,14 +95,18 @@ const prepareTwo = ({
   };
 };
 
+declare const plugin1State: Plugin1State;
+
 describe("value object", () => {
-  it("value object: exists", () => {
+  //? type test - it should be skipped by jest
+  it.skip("value object: exists", () => {
     const test = prepareOne({});
 
     const valueObject = test.execute();
 
-    assert<Plugin1State>(valueObject.plugins[0].state);
+    exactType(valueObject.plugins[0].state, plugin1State);
   });
+
   it("value object: plugin hook mutates state", async () => {
     const handlerPayload: HandlerPayload = { name: falso.randFullName() };
     const test = prepareOne({

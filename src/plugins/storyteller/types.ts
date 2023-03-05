@@ -30,9 +30,9 @@ export enum StorytellerHookName {
   stepFinished = "stepFinished",
   stepErrored = "stepErrored",
 
-  scenarioStarted = "scenarioStarted",
-  scenarioFinished = "scenarioFinished",
-  scenarioErrored = "scenarioErrored",
+  storyStarted = "storyStarted",
+  storyFinished = "storyFinished",
+  storyErrored = "storyErrored",
 
   arrangeStarted = "arrangeStarted",
   arrangeFinished = "arrangeFinished",
@@ -67,9 +67,9 @@ export type StorytellerHookDefinition =
       StorytellerHookName.stepCreated,
       { step: StorytellerStep<string, StorytellerStepStatus.created, ValueObject<Status.forged, any, any>> }
     >
-  | HookDefinition<StorytellerHookName.scenarioStarted, {}>
-  | HookDefinition<StorytellerHookName.scenarioErrored, { error: Error }>
-  | HookDefinition<StorytellerHookName.scenarioFinished, {}>
+  | HookDefinition<StorytellerHookName.storyStarted, {}>
+  | HookDefinition<StorytellerHookName.storyErrored, { error: Error }>
+  | HookDefinition<StorytellerHookName.storyFinished, {}>
   | HookDefinition<StorytellerHookName.storytellerCreated, {}>
   | HookDefinition<StorytellerHookName.arrangeStarted, {}>
   | HookDefinition<StorytellerHookName.arrangeFinished, {}>
@@ -89,18 +89,18 @@ export interface StorytellerState<
 > {
   steps: TStep[];
   globalState: {
-    scenariosCreatedAmount: number;
-    scenariosStartedAmount: number;
-    scenariosFinishedAmount: number;
-    scenariosErroredAmount: number;
-    scenarioName: string;
+    storiesCreatedAmount: number;
+    storiesStartedAmount: number;
+    storiesFinishedAmount: number;
+    storiesErroredAmount: number;
+    storyName: string;
   };
   defaultStates: { pluginName: string; state: TState }[];
 }
 
 export interface StorytellerActions<TStepName extends string> extends PluginAction<any, any, any> {
-  storytellerScenario: (scenario: Scenario<TStepName, StorytellerValueObject<TStepName>>) => () => Promise<void>;
-  storytellerStep: (
+  storytellerCreateStory: (story: Story<TStepName, StorytellerValueObject<TStepName>>) => () => Promise<void>;
+  storytellerCreateStep: (
     step: Omit<StorytellerStep<TStepName, StorytellerStepStatus, ValueObject<Status.forged, any, any>>, "status">,
   ) => {
     (actions: Promise<void> | void): Promise<void>;
@@ -129,7 +129,7 @@ export interface StorytellerValueObject<TStepName extends string>
 
 export interface TestRunnerNameGetters {
   name: string;
-  getScenarioName: () => string | void;
+  getStoryName: () => string | void;
 }
 
 export type Section<TStepName extends string, TValueObject extends StorytellerValueObject<TStepName>> = (
@@ -142,14 +142,14 @@ export enum SectionName {
   assert = "assert",
 }
 
-export type Scenario<TStepName extends string, TValueObject extends StorytellerValueObject<TStepName>> = {
+export type Story<TStepName extends string, TValueObject extends StorytellerValueObject<TStepName>> = {
   [key in SectionName]: Section<TStepName, TValueObject>;
 };
 
 export interface StorytellerHelper<TStepName extends string, TValueObject extends StorytellerValueObject<TStepName>> {
   runHooks: TValueObject["runHooks"];
-  createScenario: TValueObject["actions"]["storytellerScenario"];
-  createStep: TValueObject["actions"]["storytellerStep"] extends (
+  createStory: TValueObject["actions"]["storytellerCreateStory"];
+  createStep: TValueObject["actions"]["storytellerCreateStep"] extends (
     step: Omit<StorytellerStep<infer UCreateStep, StorytellerStepStatus, TValueObject>, "status">,
   ) => (prevStepPromise: Promise<void> | void) => Promise<void>
     ? <TStep extends Omit<StorytellerStep<UCreateStep, StorytellerStepStatus, TValueObject>, "status">>(

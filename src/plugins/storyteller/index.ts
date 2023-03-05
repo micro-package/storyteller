@@ -13,13 +13,13 @@ import type {
 } from "./types";
 import { SectionName } from "./types";
 import { StorytellerHookName, StorytellerStepStatus } from "./types";
-import { pipe, pipelineUnary } from "ts-pipe-compose";
+import { pipelineUnary } from "ts-pipe-compose";
 
 export const testRunnerNameGetters: TestRunnerNameGetters[] = [
   //@ts-ignore
-  { name: "jest", getScenarioName: () => expect?.getState()?.currentTestName },
+  { name: "jest", getStoryName: () => expect?.getState()?.currentTestName },
   //@ts-ignore
-  { name: "mocha", getScenarioName: () => this?.test?.fullTitle() },
+  { name: "mocha", getStoryName: () => this?.test?.fullTitle() },
 ];
 
 export const storytellerPlugin = <TStepName extends string>(config: {
@@ -34,17 +34,17 @@ export const storytellerPlugin = <TStepName extends string>(config: {
     name: STORYTELLER_PLUG,
     state: {
       globalState: {
-        scenariosCreatedAmount: 0,
-        scenariosStartedAmount: 0,
-        scenariosFinishedAmount: 0,
-        scenariosErroredAmount: 0,
-        scenarioName: "SCENARIO_NAME_NOT_SET",
+        storiesCreatedAmount: 0,
+        storiesStartedAmount: 0,
+        storiesFinishedAmount: 0,
+        storiesErroredAmount: 0,
+        storyName: "STORY_NAME_NOT_SET",
       },
       steps: [],
       defaultStates: [],
     },
     actions: {
-      storytellerStep: (valueObject: StorytellerValueObject<TStepName>) => (step) => {
+      storytellerCreateStep: (valueObject: StorytellerValueObject<TStepName>) => (step) => {
         const stepReference = { ...step, status: StorytellerStepStatus.created };
         const stepHandler = async (prevStepPromise: Promise<any>) => {
           await prevStepPromise;
@@ -73,21 +73,21 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         stepHandler.handler = step.handler;
         return stepHandler;
       },
-      storytellerScenario: (valueObject: StorytellerValueObject<TStepName>) =>
-        function (scenario) {
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosCreatedAmount += 1;
+      storytellerCreateStory: (valueObject: StorytellerValueObject<TStepName>) =>
+        function (story) {
+          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesCreatedAmount += 1;
           return async () => {
-            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosStartedAmount += 1;
-            const scenarioName = (
+            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesStartedAmount += 1;
+            const storyName = (
               config.testRunnerGetTestName === undefined
                 ? testRunnerNameGetters
                 : [config.testRunnerGetTestName, ...testRunnerNameGetters]
             )
               .map((payload) => {
                 try {
-                  const name = payload.getScenarioName();
+                  const name = payload.getStoryName();
                   if (name === undefined) {
-                    throw Error("no scenario name");
+                    throw Error("no story name");
                   }
                   logger.plugin(STORYTELLER_PLUG, `Test name received from "${payload.name}" test runner`);
                   return name;
@@ -96,15 +96,15 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                 }
               })
               .find((testName) => testName !== undefined);
-            if (scenarioName === undefined) {
-              throw errorPlugin("scenario name couldn`t be received from test runner");
+            if (storyName === undefined) {
+              throw errorPlugin("story name couldn`t be received from test runner");
             }
-            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenarioName = scenarioName;
+            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName = storyName;
             try {
-              await valueObject.runHooks({ name: StorytellerHookName.scenarioStarted });
+              await valueObject.runHooks({ name: StorytellerHookName.storyStarted });
               try {
                 await valueObject.runHooks({ name: StorytellerHookName.arrangeStarted });
-                await scenario.arrange(valueObject.actions);
+                await story.arrange(valueObject.actions);
                 await valueObject.runHooks({ name: StorytellerHookName.arrangeFinished });
               } catch (error) {
                 await valueObject.runHooks({
@@ -115,7 +115,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
               }
               try {
                 await valueObject.runHooks({ name: StorytellerHookName.actStarted });
-                await scenario.act(valueObject.actions);
+                await story.act(valueObject.actions);
                 await valueObject.runHooks({ name: StorytellerHookName.actFinished });
               } catch (error) {
                 await valueObject.runHooks({ name: StorytellerHookName.actErrored, payload: { error } });
@@ -123,25 +123,25 @@ export const storytellerPlugin = <TStepName extends string>(config: {
               }
               try {
                 await valueObject.runHooks({ name: StorytellerHookName.assertStarted });
-                await scenario.assert(valueObject.actions);
+                await story.assert(valueObject.actions);
                 await valueObject.runHooks({ name: StorytellerHookName.assertFinished });
               } catch (error) {
                 await valueObject.runHooks({ name: StorytellerHookName.assertErrored, payload: { error } });
                 throw error;
               }
-              await valueObject.runHooks({ name: StorytellerHookName.scenarioFinished });
-              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosFinishedAmount += 1;
+              await valueObject.runHooks({ name: StorytellerHookName.storyFinished });
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesFinishedAmount += 1;
             } catch (error) {
-              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosErroredAmount += 1;
-              await valueObject.runHooks({ name: StorytellerHookName.scenarioErrored, payload: { error } });
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesErroredAmount += 1;
+              await valueObject.runHooks({ name: StorytellerHookName.storyErrored, payload: { error } });
               throw error;
             } finally {
-              //? This setImmediate makes storyteller to run if condition after the next scenario is triggered or now if no scenario was left to trigger. This way condition is met only if last scenario is finished.
+              //? This setImmediate makes storyteller to run if condition after the next story is triggered or now if no story was left to trigger. This way condition is met only if last story is finished.
               setImmediate(async () => {
                 if (
-                  valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosStartedAmount ===
-                  valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosErroredAmount +
-                    valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosFinishedAmount
+                  valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesStartedAmount ===
+                  valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesErroredAmount +
+                    valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesFinishedAmount
                 ) {
                   await valueObject.runHooks({ name: StorytellerHookName.storytellerFinished });
                 }
@@ -270,18 +270,18 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         },
       },
       {
-        name: StorytellerHookName.scenarioFinished,
+        name: StorytellerHookName.storyFinished,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async () => {
           logger.descent(
             STORYTELLER_PLUG,
-            `scenario finished \"${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenarioName}\" - ${
-              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosStartedAmount
-            } finished, ${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosCreatedAmount} created`,
+            `story finished \"${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName}\" - ${
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesStartedAmount
+            } finished, ${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesCreatedAmount} created`,
           );
         },
       },
       {
-        name: StorytellerHookName.scenarioStarted,
+        name: StorytellerHookName.storyStarted,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
           const defaultStates = cloneDeep(valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates);
           valueObject.plugins = valueObject.plugins.map((plugin) => {
@@ -300,20 +300,20 @@ export const storytellerPlugin = <TStepName extends string>(config: {
           valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates = defaultStates;
           logger.ascent(
             STORYTELLER_PLUG,
-            `scenario started \"${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenarioName}\" - ${
-              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosStartedAmount
-            } started, ${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosCreatedAmount} created`,
+            `story started \"${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName}\" - ${
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesStartedAmount
+            } started, ${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesCreatedAmount} created`,
           );
         },
       },
       {
-        name: StorytellerHookName.scenarioErrored,
+        name: StorytellerHookName.storyErrored,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
           logger.descent(
             STORYTELLER_PLUG,
-            `scenario errored \"${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenarioName}\" - ${
-              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosStartedAmount
-            } errored, ${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.scenariosCreatedAmount} created: ${
+            `story errored \"${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName}\" - ${
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesStartedAmount
+            } errored, ${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesCreatedAmount} created: ${
               payload.error.message
             }`,
           );
@@ -324,7 +324,9 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
           logger.plugin(
             STORYTELLER_PLUG,
-            `Step appended "${payload.step.name}" - ${valueObject.getPlugin(STORYTELLER_PLUG).state.steps.length} index`,
+            `Step appended "${payload.step.name}" - ${
+              valueObject.getPlugin(STORYTELLER_PLUG).state.steps.length
+            } index`,
           );
         },
       },
@@ -346,15 +348,13 @@ export const storytellerHelper = <TValueObject extends StorytellerValueObject<st
     name: StorytellerHookName.storytellerCreated,
   });
   valueObject.getPlugin(STORYTELLER_PLUG).hooks.unshift({
-    name: StorytellerHookName.scenarioStarted,
+    name: StorytellerHookName.storyStarted,
     handler: () => () => storytellerCreatedPromise,
   });
   return {
     runHooks: valueObject.runHooks,
-    createStep: valueObject.actions.storytellerStep as any,
-    createScenario: valueObject.actions.storytellerScenario as any,
+    createStep: valueObject.actions.storytellerCreateStep as any,
+    createStory: valueObject.actions.storytellerCreateStory as any,
     composeSection: pipelineUnary,
   };
 };
-
-export const compose = pipe;

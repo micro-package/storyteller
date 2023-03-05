@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-import { compose, storytellerHelper, storytellerPlugin } from ".";
-import { inspect } from "util";
+import { pipe } from "ts-pipe-compose";
+import { storytellerHelper, storytellerPlugin } from ".";
 import { createValueObject, forgeValueObject } from "../../container/value-object";
 
-const testFramework = compose(
+const testFramework = pipe(
   createValueObject(),
   storytellerPlugin({}),
   forgeValueObject({ debug: false }),
@@ -13,13 +13,13 @@ const testFramework = compose(
 describe("00", () => {
   it(
     "test0",
-    testFramework.createScenario({
+    testFramework.createStory({
       arrange: testFramework.createStep({
         name: "stepArrange",
         handler: async (valueObject) => {
           expect(valueObject).toStrictEqual({
-            storytellerScenario: expect.any(Function),
-            storytellerStep: expect.any(Function),
+            storytellerCreateStory: expect.any(Function),
+            storytellerCreateStep: expect.any(Function),
           });
         },
       }),
@@ -27,8 +27,8 @@ describe("00", () => {
         name: "stepAct",
         handler: async (valueObject) => {
           expect(valueObject).toStrictEqual({
-            storytellerScenario: expect.any(Function),
-            storytellerStep: expect.any(Function),
+            storytellerCreateStory: expect.any(Function),
+            storytellerCreateStep: expect.any(Function),
           });
         },
       }),
@@ -36,8 +36,8 @@ describe("00", () => {
         name: "stepAssert",
         handler: async (valueObject) => {
           expect(valueObject).toStrictEqual({
-            storytellerScenario: expect.any(Function),
-            storytellerStep: expect.any(Function),
+            storytellerCreateStory: expect.any(Function),
+            storytellerCreateStep: expect.any(Function),
           });
         },
       }),

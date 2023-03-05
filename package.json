@@ -1,6 +1,6 @@
 {
   "name": "@micro-package/storyteller",
-  "version": "1.0.13",
+  "version": "1.1.0",
   "private": true,
   "engines": {
     "npm": "8.19.3",
@@ -18,10 +18,37 @@
   "author": "Łukasz Klejszta",
   "license": "UNLICENSED",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.131.0",
+    "@aws-sdk/lib-dynamodb": "3.131.0",
+    "aws-sdk": "2.1224.0",
+    "cockatiel": "3.0.0",
+    "express": "4.18.2",
+    "express-async-errors": "3.1.1",
+    "http-method-enum": "1.0.0",
+    "http-status-codes": "2.2.0",
+    "lodash": "4.17.21",
+    "axios": "0.27.2",
+    "pg": "8.7.3",
+    "ts-pipe-compose": "0.2.1",
+    "typeorm": "0.3.7",
+    "generic-interceptor": "2.0.8",
+    "typeorm-naming-strategies": "4.1.0",
+    "typescript": "4.7.4",
+    "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "husky": "7.0.4",
+    "prettier": "2.7.1",
+    "@aws-sdk/smithy-client": "3.193.0",
+    "@aws-sdk/types": "3.193.0",
     "@commitlint/cli": "16.2.1",
     "@commitlint/config-conventional": "16.2.1",
-    "@micro-package/common": "1.0.5",
-    "@micro-package/container": "1.0.7",
+    "@ngneat/falso": "6.4.0",
+    "@types/express": "4.17.13",
+    "@types/express-serve-static-core": "4.17.18",
+    "@types/jest": "29.2.2",
+    "@types/lodash": "4.14.189",
+    "@types/triple-beam": "1.3.2",
     "@typescript-eslint/eslint-plugin": "5.30.6",
     "@typescript-eslint/parser": "5.30.6",
     "eslint": "8.9.0",
@@ -35,18 +62,8 @@
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-unicorn": "41.0.0",
     "eslint-plugin-unused-imports": "2.0.0",
-    "husky": "^7.0.4",
-    "lodash": "^4.17.21",
-    "prettier": "2.7.1",
-    "ts-pipe-compose": "^0.2.1"
-  },
-  "devDependencies": {
-    "@types/jest": "29.2.2",
-    "@types/lodash": "^4.14.189",
-    "@types/triple-beam": "1.3.2",
     "jest": "29.3.1",
-    "ts-jest": "^29.0.3",
-    "typescript": "4.7.4"
+    "ts-jest": "29.0.3"
   },
   "repository": {
     "type": "git",

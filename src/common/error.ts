@@ -18,7 +18,7 @@ export const errorPlugin = (
     | "data source chains are missing"
     | "could not establish connection to all data sources"
     | "missing data source"
-    | "scenario name couldn`t be received from test runner"
+    | "story name couldn`t be received from test runner"
     | "handlers usage exceeded"
     | `${"api" | "mock"} definitions endpoint name must be unique in each definition`
     | "request errored"

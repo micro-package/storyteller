@@ -1,9 +1,10 @@
 import { axiosPlugin } from ".";
 import HTTPMethod from "http-method-enum";
 import { expect } from "@jest/globals";
-import { compose, storytellerHelper } from "../storyteller/index";
+import { storytellerHelper } from "../storyteller/index";
 import { createValueObject, forgeValueObject } from "../../container/value-object";
 import { storytellerPlugin } from "../storyteller";
+import { pipe } from "ts-pipe-compose";
 enum ApiName {
   google = "google",
   api2 = "api2",
@@ -34,7 +35,7 @@ const apiDefinitions = [
   } as const,
 ];
 
-const testFramework = compose(
+const testFramework = pipe(
   createValueObject(),
   storytellerPlugin<StepName>({}),
   axiosPlugin<
@@ -62,7 +63,7 @@ const testFramework = compose(
 describe("axios plugin", () => {
   it("axios perform request and store it correctly", async () => {
     const responses: any[] = [];
-    await testFramework.createScenario({
+    await testFramework.createStory({
       arrange: testFramework.createStep({
         name: StepName.stepArrange,
         handler: async () => {},

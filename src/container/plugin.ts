@@ -1,4 +1,4 @@
-import type { UnionToIntersection } from "@micro-package/common/types";
+import type { UnionToIntersection } from "../common/types";
 import type { Hook, HookDefinition } from "./hook";
 import type { Status } from "./value-object";
 import type { ValueObject } from "./value-object";

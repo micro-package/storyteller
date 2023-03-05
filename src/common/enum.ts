@@ -9,7 +9,7 @@ export enum LoggingLevel {
 export enum LoggingSource {
   step = "step",
   section = "section",
-  scenario = "scenario",
+  story = "story",
   express = "express",
   axios = "axios",
 }
