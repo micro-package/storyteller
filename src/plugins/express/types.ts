@@ -9,26 +9,26 @@ import type { DotNotation } from "../../common/dot-notation";
 import type { EXPRESS_PLUG } from "./name";
 import type { StorytellerHookDefinition } from "../storyteller/types";
 
-export interface ApiDefinition<TApiName extends string, TEndpointName extends string> {
+export interface ExpressPluginApiDefinition<TApiName extends string, TEndpointName extends string> {
   apiName: TApiName;
   endpointName: TEndpointName;
 }
-export type ExpressMockDefinitions<TApiDefinition extends ApiDefinition<string, string>> = Pick<
+export type ExpressMockDefinitions<TApiDefinition extends ExpressPluginApiDefinition<string, string>> = Pick<
   TApiDefinition,
-  keyof ApiDefinition<string, string>
+  keyof ExpressPluginApiDefinition<string, string>
 > & {
   method: HTTPMethod;
   url: string;
 };
 
-export type ExpressMock<TApiDefinition extends ApiDefinition<string, string>> = TApiDefinition & {
+export type ExpressMock<TApiDefinition extends ExpressPluginApiDefinition<string, string>> = TApiDefinition & {
   requestParameter: ParamsDictionary;
   responseBody: any;
   requestBody: any;
   requestQuery: ParsedQs;
 };
 
-export type ExpressMockExecution<TExpressMock extends ExpressMock<ApiDefinition<string, string>>> =
+export type ExpressMockExecution<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>> =
   ExpressMockDefinitions<TExpressMock> & {
     response: Response<TExpressMock["responseBody"]>;
     request: Request<
@@ -39,7 +39,7 @@ export type ExpressMockExecution<TExpressMock extends ExpressMock<ApiDefinition<
     >;
   };
 
-export type ExpressMockPayload<TExpressMock extends ExpressMock<ApiDefinition<string, string>>> = {
+export type ExpressMockPayload<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>> = {
   endpointName: TExpressMock["endpointName"];
   handlers: ((
     request: Request<
@@ -55,7 +55,7 @@ export type ExpressMockPayload<TExpressMock extends ExpressMock<ApiDefinition<st
 
 export enum ExpressHookName {}
 export type ExpressHookDefinition = never;
-export interface ExpressState<TExpressMock extends ExpressMock<ApiDefinition<string, string>>> {
+export interface ExpressState<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>> {
   mockDefinitions: (ExpressMockDefinitions<TExpressMock> & ExpressMockPayload<TExpressMock>)[];
   executions: ExpressMockExecution<TExpressMock>[];
   globalState: {
@@ -65,11 +65,11 @@ export interface ExpressState<TExpressMock extends ExpressMock<ApiDefinition<str
   };
 }
 
-export interface ExpressActions<TExpressMock extends ExpressMock<ApiDefinition<string, string>>>
+export interface ExpressActions<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>>
   extends PluginAction<string, any, any> {
   expressMock: (
     payload: ExpressMockPayload<TExpressMock> & {
-      apiDefinition?: ExpressMockDefinitions<ApiDefinition<string, string>>;
+      apiDefinition?: ExpressMockDefinitions<ExpressPluginApiDefinition<string, string>>;
     },
   ) => Promise<void>;
   expressGetMock: <
@@ -93,7 +93,7 @@ export interface ExpressActions<TExpressMock extends ExpressMock<ApiDefinition<s
     paths?: TPath[];
   }) => ExpressMockExecution<TExpressMock>[];
 }
-export interface ExpressPlugin<TExpressMock extends ExpressMock<ApiDefinition<string, string>>>
+export interface ExpressPlugin<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>>
   extends Plugin<
     typeof EXPRESS_PLUG,
     ExpressState<TExpressMock>,
@@ -101,5 +101,5 @@ export interface ExpressPlugin<TExpressMock extends ExpressMock<ApiDefinition<st
     ExpressHookDefinition | StorytellerHookDefinition
   > {}
 
-export interface ExpressValueObject<TExpressMock extends ExpressMock<ApiDefinition<string, string>>>
+export interface ExpressValueObject<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>>
   extends ValueObject<Status.forged, ExpressHookDefinition | StorytellerHookDefinition, ExpressPlugin<TExpressMock>> {}

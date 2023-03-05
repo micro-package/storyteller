@@ -1,6 +1,6 @@
 import type { StepFunctions } from "aws-sdk";
 import type { ListExecutionsPageToken } from "aws-sdk/clients/stepfunctions";
-import type { ApiDefinition, ExpressMockExecution } from "../express/types";
+import type { ExpressPluginApiDefinition, ExpressMockExecution } from "../express/types";
 import type { RetryPolicy } from "cockatiel";
 import type { HookDefinition } from "../../container/hook";
 import type { Plugin, PluginAction } from "../../container/plugin";
@@ -15,11 +15,11 @@ export enum StepFunctionsHookName {
 }
 
 export type StepFunctionsHookDefinition =
-  | HookDefinition<StepFunctionsHookName.mocked, { apiDefinition: ApiDefinition<string, string> }>
+  | HookDefinition<StepFunctionsHookName.mocked, { apiDefinition: ExpressPluginApiDefinition<string, string> }>
   | HookDefinition<
       StepFunctionsHookName.intercepted,
       {
-        apiDefinition: ApiDefinition<string, string>;
+        apiDefinition: ExpressPluginApiDefinition<string, string>;
         handlerAmount: number;
         exhaustedAmount: number;
         payload: StepFunctions.Types.StartExecutionInput;

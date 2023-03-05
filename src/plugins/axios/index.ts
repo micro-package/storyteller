@@ -8,7 +8,7 @@ import { STORYTELLER_PLUG } from "../storyteller/name";
 import type { StorytellerHookDefinition, StorytellerValueObject } from "../storyteller/types";
 import { AXIOS_PLUG } from "./name";
 import type {
-  ApiDefinition,
+  AxiosPluginApiDefinition,
   AxiosActions,
   AxiosApiDefinition,
   AxiosHookDefinition,
@@ -19,9 +19,11 @@ import type {
 } from "./types";
 import { AxiosHookName } from "./types";
 
-export const axiosPlugin = <TAxiosPluginRequest extends AxiosPluginRequest<ApiDefinition<string, string>>>(config: {
+export const axiosPlugin = <
+  TAxiosPluginRequest extends AxiosPluginRequest<AxiosPluginApiDefinition<string, string>>,
+>(config: {
   apiDefinitions: (TAxiosPluginRequest extends infer UAxiosPluginRequest extends AxiosPluginRequest<
-    ApiDefinition<string, string>
+    AxiosPluginApiDefinition<string, string>
   >
     ? AxiosApiDefinition<UAxiosPluginRequest>
     : never)[];
@@ -36,7 +38,9 @@ export const axiosPlugin = <TAxiosPluginRequest extends AxiosPluginRequest<ApiDe
     typeof AXIOS_PLUG,
     AxiosActions<
       TAxiosPluginRequest,
-      TAxiosPluginRequest extends infer UAxiosPluginRequest extends AxiosPluginRequest<ApiDefinition<string, string>>
+      TAxiosPluginRequest extends infer UAxiosPluginRequest extends AxiosPluginRequest<
+        AxiosPluginApiDefinition<string, string>
+      >
         ? AxiosApiDefinition<UAxiosPluginRequest>
         : never
     >,
