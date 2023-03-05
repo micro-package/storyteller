@@ -1,4 +1,4 @@
-name: publish
+name: Publish
 
 on:
   workflow_dispatch:
@@ -14,10 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.16
+          registry-url: https://registry.npmjs.org/
       - uses: ./.github/actions/execute-tests
       - name: prepare-for-publication
         run: npm run pre4pub
+      - uses: ./.github/actions/authenticate-aws
       - uses: ./.github/actions/get-aws-secrets
       - name: publication
         run: cd .dist && npm publish --access public

@@ -1,4 +1,4 @@
-name: deprecate
+name: Deprecate
 
 on:
   workflow_dispatch:
@@ -20,9 +20,11 @@ jobs:
   deprecate-package-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.16
+          registry-url: https://registry.npmjs.org/
       - name: deprecate
         run: npm deprecate @${{ github.repository }}@${{ github.event.inputs.versionRange }} "${{ github.event.inputs.reasonMessage }}"
         env:
-          NODE_AUTH_TOKEN: ${{ env.MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN }}

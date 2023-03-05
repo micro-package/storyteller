@@ -1,0 +1,24 @@
+{
+  "name": "@micro-package/storyteller",
+  "version": "1.0.13",
+  "main": "index.js",
+  "engines": {
+    "node": ">=12"
+  },
+  "author": "Łukasz Klejszta",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/czlowiek488/system-test.git"
+  },
+  "bugs": {
+    "url": "https://github.com/czlowiek488/system-test/issues"
+  },
+  "homepage": "https://github.com/czlowiek488/system-test#readme",
+  "description": "Storyteller plugin for micro-package container",
+  "dependencies": {
+    "@micro-package/common": "1.0.5",
+    "@micro-package/container": "1.0.7",
+    "lodash": "4.17.21"
+  }
+}
