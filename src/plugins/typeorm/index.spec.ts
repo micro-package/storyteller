@@ -5,8 +5,9 @@ import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { expect } from "@jest/globals";
 import { createValueObject, forgeValueObject } from "../../container/value-object";
 import { storytellerPlugin, compose, storytellerHelper } from "../storyteller";
+import { normalize } from "path";
 
-const { parsed: env } = dotenv.config();
+const { parsed: env } = dotenv.config({ path: normalize(`${__dirname}/../../../.env`) });
 if (env === undefined) {
   throw Error("Test has missing env variables");
 }
@@ -64,7 +65,7 @@ const testFramework = compose(
 describe("typeorm", () => {
   it(
     "basic test",
-    testFramework.createScenario({
+    testFramework.createStory({
       arrange: testFramework.createStep({
         name: StepName.stepArrange,
         handler: async (valueObject) => {

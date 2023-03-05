@@ -66,7 +66,7 @@ const realUrl = `${new URL(mockDefinitions[0].url).origin}/${ApiName.google}${
 
 describe("express plugin", () => {
   it("express perform request and store it correctly", async () => {
-    await testFramework.createScenario({
+    await testFramework.createStory({
       arrange: testFramework.createStep({
         name: "stepArrange",
         handler: async (valueObject) => {
@@ -118,7 +118,7 @@ describe("express plugin", () => {
     })();
   });
   it("second test identical to check if both will be executed successfully", async () => {
-    await testFramework.createScenario({
+    await testFramework.createStory({
       arrange: testFramework.createStep({
         name: "stepArrange",
         handler: async (valueObject) => {

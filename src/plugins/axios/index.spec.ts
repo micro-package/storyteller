@@ -62,7 +62,7 @@ const testFramework = compose(
 describe("axios plugin", () => {
   it("axios perform request and store it correctly", async () => {
     const responses: any[] = [];
-    await testFramework.createScenario({
+    await testFramework.createStory({
       arrange: testFramework.createStep({
         name: StepName.stepArrange,
         handler: async () => {},

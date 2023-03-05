@@ -29,7 +29,7 @@ const results: any[] = [];
 describe("dynamo plugin", () => {
   it(
     "dynamo perform command and store it properly",
-    testFramework.createScenario({
+    testFramework.createStory({
       arrange: testFramework.createStep({
         name: StepName.stepArrange,
         handler: async (valueObject) => {
