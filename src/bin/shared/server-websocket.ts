@@ -1,16 +1,52 @@
 /* eslint-disable no-console */
 import type { Server } from "http";
+import type { Connection, Server as WebsocketServer } from "sockjs";
 import { createServer } from "sockjs";
 import { logger } from "./logger";
 import type { EventDispatcher } from "./event-dispatcher";
 import { eventValidator } from "../app/event";
+import type { Authorizer, jsonWebTokenPayloadValidator } from "./authorizer";
+import { UserType } from "./authorizer";
+import type { zod } from "./zod";
 
-export const createServerWebsocket = (serverHttp: Server, eventDispatcher: EventDispatcher) => {
+export enum Headers {
+  "xAccessToken" = "x-access-token",
+}
+export interface ConnectionHeaders {
+  [Headers.xAccessToken]?: string;
+}
+
+export type WebsocketConnection = Connection & {
+  headers: ConnectionHeaders;
+  jsonWebTokenPayload: zod.infer<typeof jsonWebTokenPayloadValidator>;
+};
+
+export interface ServerWebsocket {
+  websocketServer: WebsocketServer;
+  getPanelConnections: () => WebsocketConnection[];
+  getStorytellerConnections: () => WebsocketConnection[];
+}
+
+export const createServerWebsocket = (
+  serverHttp: Server,
+  eventDispatcher: EventDispatcher,
+  authorizer: Authorizer,
+): ServerWebsocket => {
+  const connections: WebsocketConnection[] = [];
   const websocketServer = createServer({
     websocket: true,
   });
-  websocketServer.on("connection", (connection) => {
+  websocketServer.on("connection", (connection: WebsocketConnection) => {
+    const authorizationResult = authorizer.authorize({
+      accessToken: connection.headers[Headers.xAccessToken],
+    });
+    if (authorizationResult.success === false) {
+      connection.close();
+      return;
+    }
+    connection.jsonWebTokenPayload = authorizationResult.jsonWebTokenPayload;
     logger.debug("CLI server", `Connection established with [${connection.id}]`);
+    connections.push(connection);
     connection.on("data", async (message) => {
       const parsedMessage: { success: true; message: any } | { success: false; error: Error } = (() => {
         try {
@@ -35,11 +71,21 @@ export const createServerWebsocket = (serverHttp: Server, eventDispatcher: Event
       logger.debug("CLI server", `message received [${connection.id}] ${message}`);
     });
     connection.on("close", () => {
-      // connection.close();
+      connection.close();
+      const indexToDelete = connections.findIndex(({ id }) => id === connection.id);
+      if (indexToDelete !== -1) {
+        connections.splice(indexToDelete, 1);
+      }
       logger.debug("CLI server", `Connection closed with [${connection.id}]`);
     });
   });
 
   websocketServer.installHandlers(serverHttp, { prefix: "/websocket" });
-  return websocketServer;
+  return {
+    websocketServer,
+    getPanelConnections: () =>
+      connections.filter((connection) => connection.jsonWebTokenPayload.userType === UserType.panel),
+    getStorytellerConnections: () =>
+      connections.filter((connection) => connection.jsonWebTokenPayload.userType === UserType.storyteller),
+  };
 };
