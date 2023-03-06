@@ -8,10 +8,10 @@ export interface EventDispatcher {
   dispatch: (event: zod.infer<typeof eventValidator>) => Promise<void>;
 }
 
-export const createEventDispatcher = (config: { subscribers: EventSubscriber<any, any, any>[] }): EventDispatcher => ({
+export const createEventDispatcher = (subscribers: EventSubscriber<any, any>[]): EventDispatcher => ({
   dispatch: async (event) => {
     await Promise.allSettled(
-      config.subscribers
+      subscribers
         .filter((subscriber) =>
           subscriber.subscriptions.find(
             (subscription) => subscription.eventValidator.shape.eventName._def.value === event.eventName,
@@ -32,9 +32,11 @@ export const createEventDispatcher = (config: { subscribers: EventSubscriber<any
             try {
               logger.debug(
                 "CLI server",
-                `dispatching event [${event.eventName}] to function [${subscription.eventFunction.name}] starts`,
+                `dispatching event [${event.eventName}] to function [${
+                  subscription.eventFunction.name
+                }] starts - ${inspect(event)}`,
               );
-              await subscription.eventFunction();
+              await subscription.eventFunction(event);
               logger.debug(
                 "CLI server",
                 `dispatching event [${event.eventName}] to function [${subscription.eventFunction.name}] succeed`,
