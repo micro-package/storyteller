@@ -2,6 +2,7 @@ import * as awilix from "awilix";
 import { commandStartTestContainer } from "../app/commands/start-test-container.command";
 import { commandStoreStorytellerEvent } from "../app/commands/store-storyteller-event.command";
 import { eventSubscriberStorage } from "../app/event-subscribers/storage.subscriber";
+import { authorizer } from "./authorizer";
 import { createCommandBus } from "./command-bus";
 import { createEventDispatcher } from "./event-dispatcher";
 import { integrationCLI } from "./integration/cli";
@@ -24,4 +25,5 @@ container.register({
   eventDispatcher: awilix.asFunction(createEventDispatcher).singleton(),
   serverWebsocket: awilix.asFunction(createServerWebsocket).singleton(),
   integrationCLI: awilix.asFunction(integrationCLI),
+  authorizer: awilix.asFunction(authorizer),
 });
