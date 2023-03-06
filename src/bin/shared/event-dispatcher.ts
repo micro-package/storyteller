@@ -8,7 +8,7 @@ export interface EventDispatcher {
   dispatch: (event: zod.infer<typeof eventValidator>) => Promise<void>;
 }
 
-export const createEventDispatcher = (config: { subscribers: EventSubscriber<any>[] }): EventDispatcher => ({
+export const createEventDispatcher = (config: { subscribers: EventSubscriber<any, any, any>[] }): EventDispatcher => ({
   dispatch: async (event) => {
     await Promise.allSettled(
       config.subscribers
