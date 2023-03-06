@@ -9,10 +9,13 @@ runs:
       run: npm clean-install
     - name: lint-tests
       shell: bash
-      run: npm run test-lint 
+      run: npm run test-lint
     - name: type-tests
       shell: bash
-      run: npm run test-types 
+      run: npm run test-types
+    - name: copy '.env.dist' to '.env'
+      shell: bash
+      run: cp .env.dist .env
     - name: code-tests
       shell: bash
-      run: npm run test 
+      run: npm run d-test
