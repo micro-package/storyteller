@@ -1,9 +1,10 @@
-import { Events } from "../enum";
-import { eventSubscriber } from "../event-subscriber";
+import { eventSubscriber } from "../../shared/event-subscriber";
+import { eventValidatorStorytellerStarted } from "../events/storyteller-started.event";
 
 export const eventSubscriberStorage = () =>
-  eventSubscriber((functions) => [{ eventName: Events.storytellerStarted, eventFunction: functions.logStarted }], {
-    logStarted: async (payload) => {
-      console.log(`Message received ${JSON.stringify(payload)}`);
+  eventSubscriber(
+    (functions) => [{ eventValidator: eventValidatorStorytellerStarted, eventFunction: functions.logStarted }],
+    {
+      logStarted: async () => {},
     },
-  });
+  );
