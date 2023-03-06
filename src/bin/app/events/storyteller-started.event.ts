@@ -1,6 +1,5 @@
 import { zod } from "../../shared/zod";
-import { Events } from "../enum";
-import { eventValidator } from "../validators";
+import { Events, eventValidator } from "../event";
 
 export const eventValidatorStorytellerStarted = eventValidator.extend({
   eventName: zod.literal(Events.storytellerStarted),
@@ -8,5 +7,3 @@ export const eventValidatorStorytellerStarted = eventValidator.extend({
     plugins: zod.string().array(),
   }),
 });
-
-export type EventStorytellerStarted = zod.infer<typeof eventValidatorStorytellerStarted>;

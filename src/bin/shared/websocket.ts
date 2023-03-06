@@ -3,7 +3,7 @@ import type { Server } from "http";
 import { createServer } from "sockjs";
 import { logger } from "../shared/logger";
 import type { EventDispatcher } from "./event-dispatcher";
-import { eventValidator } from "./validators";
+import { eventValidator } from "../app/event";
 
 export const createWebsocketServer = (config: { httpServer: Server; eventDispatcher: EventDispatcher }) => {
   const websocketServer = createServer({
@@ -12,9 +12,23 @@ export const createWebsocketServer = (config: { httpServer: Server; eventDispatc
   websocketServer.on("connection", (connection) => {
     logger.debug("CLI server", `Connection established with [${connection.id}]`);
     connection.on("data", async (message) => {
+      const parsedMessage: { success: true; message: any } | { success: false; error: Error } = (() => {
+        try {
+          return { success: true, message: JSON.parse(message) };
+        } catch (error) {
+          return { success: false, error };
+        }
+      })();
+      if (parsedMessage.success === false) {
+        logger.debug("CLI server", `invalid message received [${connection.id}] ${message} - must be json`);
+        return;
+      }
       const eventValidationResult = eventValidator.safeParse(JSON.parse(message));
       if (eventValidationResult.success === false) {
-        logger.debug("CLI server", `invalid message received [${connection.id}] ${message}`);
+        logger.debug(
+          "CLI server",
+          `invalid message received [${connection.id}] ${message} - must have event structure`,
+        );
         return;
       }
       await config.eventDispatcher.dispatch(eventValidationResult.data);
