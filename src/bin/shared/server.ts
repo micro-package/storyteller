@@ -1,9 +1,9 @@
 import { createServer } from "http";
 import { StatusCodes } from "http-status-codes";
 import { inspect } from "util";
+import { eventSubscriberStorage } from "../app/event-subscribers/storage.subscriber";
 import { logger } from "../shared/logger";
 import { createEventDispatcher } from "./event-dispatcher";
-import { eventSubscriberStorage } from "./event-subscribers/storage.subscriber";
 import { createWebsocketServer } from "./websocket";
 
 export const createHttpServer = async (config: { port: number }) => {
