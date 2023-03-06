@@ -5,6 +5,7 @@ import { eventSubscriberStorage } from "../app/event-subscribers/storage.subscri
 import { logger } from "../shared/logger";
 import { createEventDispatcher } from "./event-dispatcher";
 import { createWebsocketServer } from "./websocket";
+import { commandBus } from "./command";
 
 export const createHttpServer = async (config: { port: number }) => {
   logger.debug("CLI server", `Server starting with config ${inspect(config.port)}`);
@@ -18,7 +19,7 @@ export const createHttpServer = async (config: { port: number }) => {
     res.end();
   });
   const eventDispatcher = createEventDispatcher({
-    subscribers: [eventSubscriberStorage()],
+    subscribers: [eventSubscriberStorage({ commandBus })],
   });
   createWebsocketServer({ httpServer, eventDispatcher });
   await new Promise((resolve) => httpServer.listen(config.port, () => resolve(undefined)));
