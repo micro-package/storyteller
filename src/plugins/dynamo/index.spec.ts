@@ -6,19 +6,35 @@ import { falso } from "../../common/falso";
 import { storytellerPlugin, storytellerHelper } from "../storyteller";
 import { CreateTableCommand } from "@aws-sdk/client-dynamodb";
 import { pipe } from "ts-pipe-compose";
+import { normalize } from "path";
+import dotenv from "dotenv";
+
+const { parsed: env } = dotenv.config({ path: normalize(`${__dirname}/../../../.env.dist`) });
+if (
+  env === undefined ||
+  env.DYNAMODB_URL === undefined ||
+  env.DYNAMODB_REGION === undefined ||
+  env.AWS_ACCESS_KEY_ID === undefined ||
+  env.AWS_SECRET_ACCESS_KEY === undefined
+) {
+  throw Error("Test has missing env variables");
+}
 
 enum StepName {
   stepArrange = "stepArrange",
   stepAct = "stepAct",
   stepAssert = "stepAssert",
 }
-
 const testFramework = pipe(
   createValueObject(),
   storytellerPlugin<StepName>({}),
   dynamoPlugin({
-    endpoint: "http://localhost:8000",
-    region: "eu-central-1	",
+    endpoint: env.DYNAMODB_URL,
+    region: env.DYNAMODB_REGION,
+    credentials: {
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+    },
   }),
   forgeValueObject({ debug: false }),
   storytellerHelper,
@@ -28,8 +44,7 @@ const TableName = "test-table-name";
 const results: any[] = [];
 
 describe("dynamo plugin", () => {
-  //? skipped because of lack of tests running in docker container
-  it.skip(
+  it(
     "dynamo perform command and store it properly",
     testFramework.createStory({
       arrange: testFramework.createStep({

@@ -118,8 +118,7 @@ describe("hook", () => {
     expect("handler" in valueObject.plugins[0].hooks[0]).toStrictEqual(true);
   });
 
-  //? type test - it should be skipped by jest
-  it.skip("hook: handler, 1 plugin, payload", () => {
+  it.skip("<type test>hook: handler, 1 plugin, payload", () => {
     const test = prepareOne({});
 
     const valueObject = test.execute();
@@ -127,8 +126,7 @@ describe("hook", () => {
     exactType(valueObject.plugins[0].hooks[0].handler, hookHandlerTestPluginHookDefinitionPayload);
   });
 
-  //? type test - it should be skipped by jest
-  it.skip("hook: handler, 1 plugin, name", () => {
+  it.skip("<type test>hook: handler, 1 plugin, name", () => {
     const test = prepareOne({});
 
     const valueObject = test.execute();
@@ -136,8 +134,7 @@ describe("hook", () => {
     exactType(valueObject.plugins[0].hooks[0].name, testPluginHookDefinitionName);
   });
 
-  //? type test - it should be skipped by jest
-  it.skip("hook: handler, 2 plugin, payload & name", () => {
+  it.skip("<type test>hook: handler, 2 plugin, payload & name", () => {
     const test = prepareTwo({ plugin2HookName: TestHookName.testHook1 });
 
     const valueObject = test.execute();
@@ -154,8 +151,7 @@ describe("hook", () => {
     );
   });
 
-  //? type test - it should be skipped by jest
-  it.skip("hook: handler, 2 plugin, payload & name", () => {
+  it.skip("<type test>hook: handler, 2 plugin, payload & name", () => {
     const test = prepareTwo({ plugin2HookName: TestHookName.testHook1 });
 
     const valueObject = test.execute();
@@ -172,8 +168,7 @@ describe("hook", () => {
     );
   });
 
-  //? type test - it should be skipped by jest
-  it.skip("hook: runHooks", async () => {
+  it.skip("<type test>hook: runHooks", async () => {
     const test = prepareTwo({
       plugin1HookLength: 2,
       plugin2HookLength: 2,
