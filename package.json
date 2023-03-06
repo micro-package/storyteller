@@ -13,7 +13,8 @@
     "test": "./node_modules/.bin/jest --runInBand --config jest.config.json",
     "test-types": "./node_modules/.bin/tsc --project ./tsconfig.json",
     "test-lint": "./node_modules/.bin/eslint -c ./eslint.json --ext .ts ./",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "d-test": "docker-compose --env-file=.env run $npm_config_args storyteller npm run test"
   },
   "author": "Łukasz Klejszta",
   "license": "UNLICENSED",

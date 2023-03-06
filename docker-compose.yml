@@ -1,13 +1,32 @@
 version: "3.4"
 services:
+  storyteller:
+    container_name: storyteller
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - 3000:3000
+    networks:
+      - app
+    depends_on:
+      - dynamodb
+      - postgres
+    links:
+      - dynamodb
   dynamodb:
+    container_name: dynamodb
     image: amazon/dynamodb-local
-    hostname: dynamodb
     restart: always
     ports:
       - 8000:8000
     command: "-jar DynamoDBLocal.jar -inMemory"
+    networks:
+      - app
   postgres:
+    container_name: postgres
     image: postgres:10-alpine
     ports:
       - 5432:5432

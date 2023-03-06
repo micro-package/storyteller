@@ -98,8 +98,7 @@ const prepareTwo = ({
 declare const plugin1State: Plugin1State;
 
 describe("value object", () => {
-  //? type test - it should be skipped by jest
-  it.skip("value object: exists", () => {
+  it.skip("<type test>value object: exists", () => {
     const test = prepareOne({});
 
     const valueObject = test.execute();
