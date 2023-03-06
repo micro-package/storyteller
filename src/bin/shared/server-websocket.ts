@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 import type { Server } from "http";
 import { createServer } from "sockjs";
-import { logger } from "../shared/logger";
+import { logger } from "./logger";
 import type { EventDispatcher } from "./event-dispatcher";
 import { eventValidator } from "../app/event";
 
-export const createWebsocketServer = (config: { httpServer: Server; eventDispatcher: EventDispatcher }) => {
+export const createServerWebsocket = (serverHttp: Server, eventDispatcher: EventDispatcher) => {
   const websocketServer = createServer({
     websocket: true,
   });
@@ -31,7 +31,7 @@ export const createWebsocketServer = (config: { httpServer: Server; eventDispatc
         );
         return;
       }
-      await config.eventDispatcher.dispatch(eventValidationResult.data);
+      await eventDispatcher.dispatch(eventValidationResult.data);
       logger.debug("CLI server", `message received [${connection.id}] ${message}`);
     });
     connection.on("close", () => {
@@ -40,5 +40,6 @@ export const createWebsocketServer = (config: { httpServer: Server; eventDispatc
     });
   });
 
-  websocketServer.installHandlers(config.httpServer, { prefix: "/websocket" });
+  websocketServer.installHandlers(serverHttp, { prefix: "/websocket" });
+  return websocketServer;
 };
