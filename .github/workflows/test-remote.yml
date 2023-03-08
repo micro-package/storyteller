@@ -19,9 +19,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - name: github
         run: echo "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-    - name: configure-aws-credentials2
-      uses: aws-actions/configure-aws-credentials@v1-node16
-      with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN_GITHUB_CICD }}
-        aws-region: eu-central-1
+      - name: configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_GITHUB_CICD }}
+          aws-region: eu-central-1
       # - uses: ./.github/actions/perform-tests
