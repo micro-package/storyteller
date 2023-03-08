@@ -3,7 +3,7 @@ name: Publish
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   id-token: write
@@ -21,7 +21,11 @@ jobs:
       - uses: ./.github/actions/perform-tests
       - name: prepare-for-publication
         run: npm run pre4pub
-      - uses: ./.github/actions/authenticate-aws
+      - name: configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_GITHUB_CICD }}
+          aws-region: eu-central-1
       - uses: ./.github/actions/get-aws-secrets
       - name: publication
         run: cd .dist && npm publish --access public
