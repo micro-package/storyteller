@@ -16,6 +16,9 @@ runs:
     - name: copy '.env.dist' to '.env'
       shell: bash
       run: cp .env.dist .env
+    - name: start storyteller service
+      shell: bash
+      run: pwd && ls && npm i -g @micro-package/cli && storyteller start --serviceStdio=inherit
     - name: code-tests
       shell: bash
-      run: npm run d-test
+      run: storyteller dispatch-event --eventName=testStartRequested --testNames[0]=typeorm --dockerComposeFilePath="./docker-compose.yml"

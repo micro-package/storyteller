@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import { config } from "dotenv";
 import { typeormPlugin } from ".";
 import { Column, DataSource, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
@@ -7,7 +7,7 @@ import { createValueObject, forgeValueObject } from "../../container/value-objec
 import { storytellerPlugin, storytellerHelper } from "../storyteller";
 import { normalize } from "path";
 import { pipe } from "ts-pipe-compose";
-const { parsed: env } = dotenv.config({ path: normalize(`${__dirname}/../../../.env.dist`) });
+const { parsed: env } = config({ path: normalize(`${__dirname}/../../../.env`) });
 if (
   env === undefined ||
   env.POSTGRES_USERNAME === undefined ||
