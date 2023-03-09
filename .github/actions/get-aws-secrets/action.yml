@@ -9,4 +9,3 @@ runs:
       with:
         secret-ids: |
           MICRO_PACKAGE_GITHUB_ACTIONS_NPM_NODE_AUTH_TOKEN
-          STORYTELLER_SLACKBOT_TOKEN

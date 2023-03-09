@@ -1,5 +1,5 @@
 import type { pipelineUnary } from "ts-pipe-compose";
-import type { HookDefinition } from "../../container/hook";
+import type { HookDefinition, PrimaryHookDefinition } from "../../container/hook";
 import type { Plugin, PluginAction, PluginName } from "../../container/plugin";
 import type { Status, ValueObject } from "../../container/value-object";
 import type { STORYTELLER_PLUG } from "./name";
@@ -80,7 +80,8 @@ export type StorytellerHookDefinition =
   | HookDefinition<StorytellerHookName.assertStarted, {}>
   | HookDefinition<StorytellerHookName.assertFinished, {}>
   | HookDefinition<StorytellerHookName.assertErrored, { error: Error }>
-  | HookDefinition<StorytellerHookName.storytellerFinished, {}>;
+  | HookDefinition<StorytellerHookName.storytellerFinished, {}>
+  | PrimaryHookDefinition<any>;
 
 export interface StorytellerState<
   TStepName extends string,

@@ -4,4 +4,4 @@
 npx --no-install commitlint --edit "$1"
 npm run test-lint
 npm run test-types
-npm run d-test --args=-T
+npm run d-test --args=--no-TTY

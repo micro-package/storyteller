@@ -23,4 +23,4 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_GITHUB_CICD }}
           aws-region: eu-west-1
       - run: npm i -g @micro-package/cli
-      - run: storyteller service start -r --slack.channel="storyteller-slackbot" --slack.token="${{ secrets.STORYTELLER_SLACKBOT_TOKEN }}"
+      - run: storyteller service start -r --slack.channel="storyteller-slackbot" --slack.tokenSecretArn="${{ secrets.STORYTELLER_SLACKBOT_TOKEN_SECRET_ARN }}"

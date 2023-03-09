@@ -14,6 +14,11 @@ import type {
 import { SectionName } from "./types";
 import { StorytellerHookName, StorytellerStepStatus } from "./types";
 import { pipelineUnary } from "ts-pipe-compose";
+import { WebSocket } from "ws";
+import { PrimaryHookName } from "../../container/hook";
+import { secureJsonStringify } from "../../common/parser/secure-json";
+import { v4 } from "uuid";
+import { DateTime } from "luxon";
 
 export const testRunnerNameGetters: TestRunnerNameGetters[] = [
   //@ts-ignore
@@ -21,6 +26,15 @@ export const testRunnerNameGetters: TestRunnerNameGetters[] = [
   //@ts-ignore
   { name: "mocha", getStoryName: () => this?.test?.fullTitle() },
 ];
+const url = "ws://localhost:8010/websocket/websocket";
+const ws = new WebSocket(`${url}?userId=123&userType=storyteller`);
+const wsConnection = new Promise((resolve) =>
+  ws.once("open", () => {
+    logger.plugin(STORYTELLER_PLUG, `Websocket connected: ${url}`);
+    resolve(undefined);
+  }),
+);
+const executionId = v4();
 
 export const storytellerPlugin = <TStepName extends string>(config: {
   testRunnerGetTestName?: TestRunnerNameGetters;
@@ -49,6 +63,10 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         const stepHandler = async (prevStepPromise: Promise<any>) => {
           await prevStepPromise;
           valueObject.getPlugin(STORYTELLER_PLUG).state.steps.push(stepReference);
+          await valueObject.runHooks({
+            name: StorytellerHookName.stepCreated,
+            payload: { step: stepReference as any },
+          });
           stepReference.status = StorytellerStepStatus.started;
           await valueObject.runHooks({
             name: StorytellerHookName.stepStarted,
@@ -333,8 +351,35 @@ export const storytellerPlugin = <TStepName extends string>(config: {
       {
         name: StorytellerHookName.storytellerCreated,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async () => {
+          await wsConnection;
           valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates = valueObject.plugins.map((plugin) =>
             cloneDeep({ pluginName: plugin.name, state: plugin.state }),
+          );
+        },
+      },
+      {
+        name: StorytellerHookName.storytellerFinished,
+        handler: (valueObject: StorytellerValueObject<TStepName>) => async () => {
+          ws.close();
+          valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates = valueObject.plugins.map((plugin) =>
+            cloneDeep({ pluginName: plugin.name, state: plugin.state }),
+          );
+        },
+      },
+      {
+        name: PrimaryHookName.beforeHook,
+        handler: () => async (payload) => {
+          await wsConnection;
+          ws.send(
+            secureJsonStringify({
+              eventName: "storytellerHookBefore",
+              eventPayload: {
+                executionId,
+                hookName: payload.name,
+                hookPayload: payload.payload,
+                createdAt: DateTime.now().toISO(),
+              },
+            }),
           );
         },
       },
