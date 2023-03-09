@@ -5,6 +5,9 @@
   "engines": {
     "node": ">=12"
   },
+  "bin": {
+    "storyteller": "./bin/index.js"
+  },
   "author": "Łukasz Klejszta",
   "license": "UNLICENSED",
   "repository": {
