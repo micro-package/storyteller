@@ -7,9 +7,9 @@ import { storytellerPlugin, storytellerHelper } from "../storyteller";
 import { CreateTableCommand } from "@aws-sdk/client-dynamodb";
 import { pipe } from "ts-pipe-compose";
 import { normalize } from "path";
-import dotenv from "dotenv";
+import { config } from "dotenv";
 
-const { parsed: env } = dotenv.config({ path: normalize(`${__dirname}/../../../.env.dist`) });
+const { parsed: env } = config({ path: normalize(`${__dirname}/../../../.env`) });
 if (
   env === undefined ||
   env.DYNAMODB_URL === undefined ||

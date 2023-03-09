@@ -14,7 +14,7 @@
     "test-types": "./node_modules/.bin/tsc --project ./tsconfig.json",
     "test-lint": "./node_modules/.bin/eslint -c ./eslint.json --ext .ts ./",
     "prepare": "husky install",
-    "d-test": "docker-compose --env-file=.env run $npm_config_args storyteller npm run test"
+    "d-test": "docker-compose --env-file=.env run --service-ports $npm_config_args storyteller npm run test"
   },
   "author": "Łukasz Klejszta",
   "license": "UNLICENSED",
@@ -22,24 +22,22 @@
     "@aws-sdk/client-dynamodb": "3.131.0",
     "@aws-sdk/lib-dynamodb": "3.131.0",
     "aws-sdk": "2.1224.0",
+    "axios": "0.27.2",
     "cockatiel": "3.0.0",
     "express": "4.18.2",
     "express-async-errors": "3.1.1",
+    "generic-interceptor": "2.0.8",
     "http-method-enum": "1.0.0",
     "http-status-codes": "2.2.0",
     "lodash": "4.17.21",
-    "axios": "0.27.2",
     "pg": "8.7.3",
     "ts-pipe-compose": "0.2.1",
     "typeorm": "0.3.7",
-    "generic-interceptor": "2.0.8",
     "typeorm-naming-strategies": "4.1.0",
     "typescript": "4.7.4",
     "winston": "^3.8.2"
   },
   "devDependencies": {
-    "husky": "7.0.4",
-    "prettier": "2.7.1",
     "@aws-sdk/smithy-client": "3.193.0",
     "@aws-sdk/types": "3.193.0",
     "@commitlint/cli": "16.2.1",
@@ -63,16 +61,19 @@
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-unicorn": "41.0.0",
     "eslint-plugin-unused-imports": "2.0.0",
+    "husky": "7.0.4",
     "jest": "29.3.1",
-    "ts-jest": "29.0.3"
+    "prettier": "2.7.1",
+    "ts-jest": "29.0.3",
+    "websocket": "^1.0.34"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/czlowiek488/system-test.git"
+    "url": "git+https://github.com/micro-package/storyteller.git"
   },
   "bugs": {
-    "url": "https://github.com/czlowiek488/system-test/issues"
+    "url": "https://github.com/micro-package/storyteller/issues"
   },
-  "homepage": "https://github.com/czlowiek488/system-test#readme",
+  "homepage": "https://github.com/micro-package/storyteller#readme",
   "description": ""
 }
