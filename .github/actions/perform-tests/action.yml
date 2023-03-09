@@ -18,7 +18,7 @@ runs:
       run: cp .env.dist .env
     - name: start storyteller service
       shell: bash
-      run: npm i -g @micro-package/cli && storyteller start --serviceStdio=inherit
+      run: npm i -g @micro-package/cli && storyteller service start --serviceStdio=inherit
     - name: code-tests
       shell: bash
-      run: storyteller start-tests && sleep infinity
+      run: storyteller tests start

@@ -17,11 +17,10 @@ jobs:
         with:
           node-version: 16.16
           registry-url: https://registry.npmjs.org/
-      - name: github
-        run: echo "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       - name: configure-aws-credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_GITHUB_CICD }}
-          aws-region: eu-central-1
-      # - uses: ./.github/actions/perform-tests
+          aws-region: eu-west-1
+      - run: npm i -g @micro-package/cli
+      - run: storyteller service start -r --slack.channel="storyteller-slackbot" --slack.token="${{ secrets.STORYTELLER_SLACKBOT_TOKEN }}"
