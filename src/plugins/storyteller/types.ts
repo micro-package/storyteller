@@ -1,4 +1,5 @@
 import type { pipelineUnary } from "ts-pipe-compose";
+import type { WebSocket } from "ws";
 import type { HookDefinition, PrimaryHookDefinition } from "../../container/hook";
 import type { Plugin, PluginAction, PluginName } from "../../container/plugin";
 import type { Status, ValueObject } from "../../container/value-object";
@@ -95,6 +96,9 @@ export interface StorytellerState<
     storiesFinishedAmount: number;
     storiesErroredAmount: number;
     storyName: string;
+    ws?: {
+      getWebsocket: () => Promise<WebSocket>;
+    };
   };
   defaultStates: { pluginName: string; state: TState }[];
 }
