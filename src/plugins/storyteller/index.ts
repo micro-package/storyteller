@@ -26,18 +26,28 @@ export const testRunnerNameGetters: TestRunnerNameGetters[] = [
   //@ts-ignore
   { name: "mocha", getStoryName: () => this?.test?.fullTitle() },
 ];
-const url = "ws://localhost:8010/websocket/websocket";
-const ws = new WebSocket(`${url}?userId=123&userType=storyteller`);
-const wsConnection = new Promise((resolve) =>
-  ws.once("open", () => {
-    logger.plugin(STORYTELLER_PLUG, `Websocket connected: ${url}`);
-    resolve(undefined);
-  }),
-);
+
+const initializeWebsocketConnection = (config: { url: string }) => {
+  const websocket = new WebSocket(`${config.url}?userId=123&userType=storyteller`);
+  const wsConnection = new Promise((resolve) =>
+    websocket.once("open", () => {
+      logger.plugin(STORYTELLER_PLUG, `Websocket connected: ${config.url}`);
+      resolve(undefined);
+    }),
+  );
+  return {
+    getWebsocket: async () => {
+      await wsConnection;
+      return websocket;
+    },
+  };
+};
 const executionId = v4();
+const url = "ws://localhost:8010/websocket/websocket";
 
 export const storytellerPlugin = <TStepName extends string>(config: {
   testRunnerGetTestName?: TestRunnerNameGetters;
+  websocket?: boolean;
 }) =>
   createPlugin<
     typeof STORYTELLER_PLUG,
@@ -53,6 +63,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         storiesFinishedAmount: 0,
         storiesErroredAmount: 0,
         storyName: "STORY_NAME_NOT_SET",
+        ws: config.websocket === true ? initializeWebsocketConnection({ url }) : undefined,
       },
       steps: [],
       defaultStates: [],
@@ -351,7 +362,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
       {
         name: StorytellerHookName.storytellerCreated,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async () => {
-          await wsConnection;
+          await valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.ws?.getWebsocket();
           valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates = valueObject.plugins.map((plugin) =>
             cloneDeep({ pluginName: plugin.name, state: plugin.state }),
           );
@@ -360,7 +371,10 @@ export const storytellerPlugin = <TStepName extends string>(config: {
       {
         name: StorytellerHookName.storytellerFinished,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async () => {
-          ws.close();
+          const websocket = await valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.ws?.getWebsocket();
+          if (websocket !== undefined) {
+            websocket.close();
+          }
           valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates = valueObject.plugins.map((plugin) =>
             cloneDeep({ pluginName: plugin.name, state: plugin.state }),
           );
@@ -368,19 +382,22 @@ export const storytellerPlugin = <TStepName extends string>(config: {
       },
       {
         name: PrimaryHookName.beforeHook,
-        handler: () => async (payload) => {
-          await wsConnection;
-          ws.send(
-            secureJsonStringify({
-              eventName: "storytellerHookBefore",
-              eventPayload: {
-                executionId,
-                hookName: payload.name,
-                hookPayload: payload.payload,
-                createdAt: DateTime.now().toISO(),
-              },
-            }),
-          );
+        handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
+          const websocket = await valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.ws?.getWebsocket();
+          if (websocket !== undefined) {
+            //TODO make service usage optional (store events locally an if connection established send them)
+            websocket.send(
+              secureJsonStringify({
+                eventName: "storytellerHookBefore",
+                eventPayload: {
+                  executionId,
+                  hookName: payload.name,
+                  hookPayload: payload.payload,
+                  createdAt: DateTime.now().toISO(),
+                },
+              }),
+            );
+          }
         },
       },
     ],
