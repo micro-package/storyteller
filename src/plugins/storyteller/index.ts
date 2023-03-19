@@ -48,11 +48,10 @@ const initializeWebsocketConnection = (config: { url: string }) => {
   };
 };
 const executionId = v4();
-const url = "ws://127.0.0.1:8010/websocket/websocket";
 
 export const storytellerPlugin = <TStepName extends string>(config: {
   testRunnerGetTestName?: TestRunnerNameGetters;
-  websocket?: boolean;
+  websocketUrl?: string;
 }) =>
   createPlugin<
     typeof STORYTELLER_PLUG,
@@ -68,7 +67,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         storiesFinishedAmount: 0,
         storiesErroredAmount: 0,
         storyName: "STORY_NAME_NOT_SET",
-        ws: config.websocket === true ? initializeWebsocketConnection({ url }) : undefined,
+        ws: config.websocketUrl !== undefined ? initializeWebsocketConnection({ url: config.websocketUrl }) : undefined,
       },
       steps: [],
       defaultStates: [],
