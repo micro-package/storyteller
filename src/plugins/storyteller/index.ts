@@ -29,6 +29,11 @@ export const testRunnerNameGetters: TestRunnerNameGetters[] = [
 
 const initializeWebsocketConnection = (config: { url: string }) => {
   const websocket = new WebSocket(`${config.url}?userId=123&userType=storyteller`);
+  websocket.on("error", (err) => logger.debug(STORYTELLER_PLUG, `weboskcet error: ${err.toString()}`));
+  websocket.on("message", (data) => logger.debug(STORYTELLER_PLUG, `weboskcet message: ${data.toString()}`));
+  websocket.on("close", (code, reason) =>
+    logger.debug(STORYTELLER_PLUG, `weboskcet close: ${code} ${Buffer.from(reason).toString()}`),
+  );
   const wsConnection = new Promise((resolve) =>
     websocket.once("open", () => {
       logger.plugin(STORYTELLER_PLUG, `Websocket connected: ${config.url}`);
