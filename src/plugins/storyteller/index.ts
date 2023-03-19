@@ -43,7 +43,7 @@ const initializeWebsocketConnection = (config: { url: string }) => {
   };
 };
 const executionId = v4();
-const url = "ws://localhost:8010/websocket/websocket";
+const url = "ws://127.0.0.1:8010/websocket/websocket";
 
 export const storytellerPlugin = <TStepName extends string>(config: {
   testRunnerGetTestName?: TestRunnerNameGetters;
