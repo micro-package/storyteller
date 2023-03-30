@@ -66,6 +66,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         storiesStartedAmount: 0,
         storiesFinishedAmount: 0,
         storiesErroredAmount: 0,
+        storyId: "STORY_ID_NOT_SET",
         storyName: "STORY_NAME_NOT_SET",
         ws: config.websocketUrl !== undefined ? initializeWebsocketConnection({ url: config.websocketUrl }) : undefined,
       },
@@ -80,25 +81,38 @@ export const storytellerPlugin = <TStepName extends string>(config: {
           valueObject.getPlugin(STORYTELLER_PLUG).state.steps.push(stepReference);
           await valueObject.runHooks({
             name: StorytellerHookName.stepCreated,
-            payload: { step: stepReference as any },
+            payload: {
+              step: stepReference as any,
+              storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+            },
           });
           stepReference.status = StorytellerStepStatus.started;
           await valueObject.runHooks({
             name: StorytellerHookName.stepStarted,
-            payload: { step: stepReference as any },
+            payload: {
+              step: stepReference as any,
+              storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+            },
           });
           try {
             await step.handler(valueObject.actions);
             stepReference.status = StorytellerStepStatus.finished;
             await valueObject.runHooks({
               name: StorytellerHookName.stepFinished,
-              payload: { step: stepReference as any },
+              payload: {
+                step: stepReference as any,
+                storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+              },
             });
           } catch (error) {
             stepReference.status = StorytellerStepStatus.errored;
             await valueObject.runHooks({
               name: StorytellerHookName.stepErrored,
-              payload: { step: stepReference as any, error },
+              payload: {
+                step: stepReference as any,
+                error,
+                storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+              },
             });
             throw error;
           }
@@ -133,40 +147,104 @@ export const storytellerPlugin = <TStepName extends string>(config: {
               throw errorPlugin("story name couldn`t be received from test runner");
             }
             valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName = storyName;
+            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId = v4();
             try {
-              await valueObject.runHooks({ name: StorytellerHookName.storyStarted });
+              await valueObject.runHooks({
+                name: StorytellerHookName.storyStarted,
+                payload: { storyName, storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId },
+              });
               try {
-                await valueObject.runHooks({ name: StorytellerHookName.arrangeStarted });
+                await valueObject.runHooks({
+                  name: StorytellerHookName.sectionStarted,
+                  payload: {
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.arrange,
+                  },
+                });
                 await story.arrange(valueObject.actions);
-                await valueObject.runHooks({ name: StorytellerHookName.arrangeFinished });
+                await valueObject.runHooks({
+                  name: StorytellerHookName.sectionFinished,
+                  payload: {
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.arrange,
+                  },
+                });
               } catch (error) {
                 await valueObject.runHooks({
-                  name: StorytellerHookName.arrangeErrored,
-                  payload: { error },
+                  name: StorytellerHookName.sectionErrored,
+                  payload: {
+                    error,
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.arrange,
+                  },
                 });
                 throw error;
               }
               try {
-                await valueObject.runHooks({ name: StorytellerHookName.actStarted });
+                await valueObject.runHooks({
+                  name: StorytellerHookName.sectionStarted,
+                  payload: {
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.act,
+                  },
+                });
                 await story.act(valueObject.actions);
-                await valueObject.runHooks({ name: StorytellerHookName.actFinished });
+                await valueObject.runHooks({
+                  name: StorytellerHookName.sectionFinished,
+                  payload: {
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.act,
+                  },
+                });
               } catch (error) {
-                await valueObject.runHooks({ name: StorytellerHookName.actErrored, payload: { error } });
+                await valueObject.runHooks({
+                  name: StorytellerHookName.sectionErrored,
+                  payload: {
+                    error,
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.act,
+                  },
+                });
                 throw error;
               }
               try {
-                await valueObject.runHooks({ name: StorytellerHookName.assertStarted });
+                await valueObject.runHooks({
+                  name: StorytellerHookName.sectionStarted,
+                  payload: {
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.assert,
+                  },
+                });
                 await story.assert(valueObject.actions);
-                await valueObject.runHooks({ name: StorytellerHookName.assertFinished });
+                await valueObject.runHooks({
+                  name: StorytellerHookName.sectionFinished,
+                  payload: {
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.act,
+                  },
+                });
               } catch (error) {
-                await valueObject.runHooks({ name: StorytellerHookName.assertErrored, payload: { error } });
+                await valueObject.runHooks({
+                  name: StorytellerHookName.sectionErrored,
+                  payload: {
+                    error,
+                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                    sectionName: SectionName.act,
+                  },
+                });
                 throw error;
               }
-              await valueObject.runHooks({ name: StorytellerHookName.storyFinished });
+              await valueObject.runHooks({
+                name: StorytellerHookName.storyFinished,
+                payload: { storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId },
+              });
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesFinishedAmount += 1;
             } catch (error) {
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesErroredAmount += 1;
-              await valueObject.runHooks({ name: StorytellerHookName.storyErrored, payload: { error } });
+              await valueObject.runHooks({
+                name: StorytellerHookName.storyErrored,
+                payload: { error, storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId },
+              });
               throw error;
             } finally {
               //? This setImmediate makes storyteller to run if condition after the next story is triggered or now if no story was left to trigger. This way condition is met only if last story is finished.
@@ -176,7 +254,10 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                   valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesErroredAmount +
                     valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesFinishedAmount
                 ) {
-                  await valueObject.runHooks({ name: StorytellerHookName.storytellerFinished });
+                  await valueObject.runHooks({
+                    name: StorytellerHookName.storytellerFinished,
+                    payload: { storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId },
+                  });
                 }
               });
             }
@@ -248,58 +329,40 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         },
       },
       {
-        name: StorytellerHookName.assertStarted,
-        handler: () => async () => {
-          logger.ascent(STORYTELLER_PLUG, "section assert started");
-        },
-      },
-      {
-        name: StorytellerHookName.assertFinished,
-        handler: () => async () => {
-          logger.descent(STORYTELLER_PLUG, "section assert finished");
-        },
-      },
-      {
-        name: StorytellerHookName.assertErrored,
+        name: StorytellerHookName.sectionStarted,
         handler: () => async (payload) => {
-          logger.plugin(STORYTELLER_PLUG, `section assert errored: ${payload.error.message}`);
-          logger.descent(STORYTELLER_PLUG, SectionName.assert);
+          if (payload.sectionName === SectionName.arrange) {
+            logger.ascent(STORYTELLER_PLUG, "section arrange started");
+          } else if (payload.sectionName === SectionName.act) {
+            logger.ascent(STORYTELLER_PLUG, "section act started");
+          } else if (payload.sectionName === SectionName.assert) {
+            logger.ascent(STORYTELLER_PLUG, "section assert started");
+          }
         },
       },
       {
-        name: StorytellerHookName.actStarted,
-        handler: () => async () => {
-          logger.ascent(STORYTELLER_PLUG, "section act started");
-        },
-      },
-      {
-        name: StorytellerHookName.actFinished,
-        handler: () => async () => {
-          logger.descent(STORYTELLER_PLUG, "section act finished");
-        },
-      },
-      {
-        name: StorytellerHookName.actErrored,
+        name: StorytellerHookName.sectionFinished,
         handler: () => async (payload) => {
-          logger.descent(STORYTELLER_PLUG, `section act errored: ${payload.error.message}`);
+          if (payload.sectionName === SectionName.arrange) {
+            logger.descent(STORYTELLER_PLUG, "section arrange finished");
+          } else if (payload.sectionName === SectionName.act) {
+            logger.descent(STORYTELLER_PLUG, "section act finished");
+          } else if (payload.sectionName === SectionName.assert) {
+            logger.descent(STORYTELLER_PLUG, "section assert finished");
+          }
         },
       },
       {
-        name: StorytellerHookName.arrangeStarted,
-        handler: () => async () => {
-          logger.ascent(STORYTELLER_PLUG, "section arrange started");
-        },
-      },
-      {
-        name: StorytellerHookName.arrangeFinished,
-        handler: () => async () => {
-          logger.descent(STORYTELLER_PLUG, "section arrange finished");
-        },
-      },
-      {
-        name: StorytellerHookName.arrangeErrored,
+        name: StorytellerHookName.sectionErrored,
         handler: () => async (payload) => {
-          logger.descent(STORYTELLER_PLUG, `section arrange errored: ${payload.error.message}`);
+          if (payload.sectionName === SectionName.arrange) {
+            logger.descent(STORYTELLER_PLUG, `section arrange errored: ${payload.error.message}`);
+          } else if (payload.sectionName === SectionName.act) {
+            logger.descent(STORYTELLER_PLUG, `section act errored: ${payload.error.message}`);
+          } else if (payload.sectionName === SectionName.assert) {
+            logger.plugin(STORYTELLER_PLUG, `section assert errored: ${payload.error.message}`);
+            logger.descent(STORYTELLER_PLUG, SectionName.assert);
+          }
         },
       },
       {
