@@ -35,17 +35,15 @@ export enum StorytellerHookName {
   storyFinished = "storyFinished",
   storyErrored = "storyErrored",
 
-  arrangeStarted = "arrangeStarted",
-  arrangeFinished = "arrangeFinished",
-  arrangeErrored = "arrangeErrored",
+  sectionStarted = "sectionStarted",
+  sectionFinished = "sectionFinished",
+  sectionErrored = "sectionErrored",
+}
 
-  actStarted = "actStarted",
-  actFinished = "actFinished",
-  actErrored = "actErrored",
-
-  assertStarted = "assertStarted",
-  assertFinished = "assertFinished",
-  assertErrored = "assertErrored",
+export enum SectionName {
+  arrange = "arrange",
+  act = "act",
+  assert = "assert",
 }
 
 export type StorytellerHookDefinition =
@@ -54,34 +52,38 @@ export type StorytellerHookDefinition =
       {
         error: Error;
         step: StorytellerStep<string, StorytellerStepStatus.errored, ValueObject<Status.forged, any, any>>;
+        storyId: string;
       }
     >
   | HookDefinition<
       StorytellerHookName.stepFinished,
-      { step: StorytellerStep<string, StorytellerStepStatus.finished, ValueObject<Status.forged, any, any>> }
+      {
+        step: StorytellerStep<string, StorytellerStepStatus.finished, ValueObject<Status.forged, any, any>>;
+        storyId: string;
+      }
     >
   | HookDefinition<
       StorytellerHookName.stepStarted,
-      { step: StorytellerStep<string, StorytellerStepStatus.started, ValueObject<Status.forged, any, any>> }
+      {
+        step: StorytellerStep<string, StorytellerStepStatus.started, ValueObject<Status.forged, any, any>>;
+        storyId: string;
+      }
     >
   | HookDefinition<
       StorytellerHookName.stepCreated,
-      { step: StorytellerStep<string, StorytellerStepStatus.created, ValueObject<Status.forged, any, any>> }
+      {
+        step: StorytellerStep<string, StorytellerStepStatus.created, ValueObject<Status.forged, any, any>>;
+        storyId: string;
+      }
     >
-  | HookDefinition<StorytellerHookName.storyStarted, {}>
-  | HookDefinition<StorytellerHookName.storyErrored, { error: Error }>
-  | HookDefinition<StorytellerHookName.storyFinished, {}>
+  | HookDefinition<StorytellerHookName.storyStarted, { storyName: string; storyId: string }>
+  | HookDefinition<StorytellerHookName.storyErrored, { error: Error; storyId: string }>
+  | HookDefinition<StorytellerHookName.storyFinished, { storyId: string }>
   | HookDefinition<StorytellerHookName.storytellerCreated, {}>
-  | HookDefinition<StorytellerHookName.arrangeStarted, {}>
-  | HookDefinition<StorytellerHookName.arrangeFinished, {}>
-  | HookDefinition<StorytellerHookName.arrangeErrored, { error: Error }>
-  | HookDefinition<StorytellerHookName.actStarted, {}>
-  | HookDefinition<StorytellerHookName.actFinished, {}>
-  | HookDefinition<StorytellerHookName.actErrored, { error: Error }>
-  | HookDefinition<StorytellerHookName.assertStarted, {}>
-  | HookDefinition<StorytellerHookName.assertFinished, {}>
-  | HookDefinition<StorytellerHookName.assertErrored, { error: Error }>
-  | HookDefinition<StorytellerHookName.storytellerFinished, {}>
+  | HookDefinition<StorytellerHookName.sectionStarted, { storyId: string; sectionName: SectionName }>
+  | HookDefinition<StorytellerHookName.sectionFinished, { storyId: string; sectionName: SectionName }>
+  | HookDefinition<StorytellerHookName.sectionErrored, { error: Error; storyId: string; sectionName: SectionName }>
+  | HookDefinition<StorytellerHookName.storytellerFinished, { storyId: string }>
   | PrimaryHookDefinition<any>;
 
 export interface StorytellerState<
@@ -95,6 +97,7 @@ export interface StorytellerState<
     storiesStartedAmount: number;
     storiesFinishedAmount: number;
     storiesErroredAmount: number;
+    storyId: string;
     storyName: string;
     ws?: {
       getWebsocket: () => Promise<WebSocket>;
@@ -140,12 +143,6 @@ export interface TestRunnerNameGetters {
 export type Section<TStepName extends string, TValueObject extends StorytellerValueObject<TStepName>> = (
   actions: TValueObject["actions"],
 ) => Promise<void>;
-
-export enum SectionName {
-  arrange = "arrange",
-  act = "act",
-  assert = "assert",
-}
 
 export type Story<TStepName extends string, TValueObject extends StorytellerValueObject<TStepName>> = {
   [key in SectionName]: Section<TStepName, TValueObject>;

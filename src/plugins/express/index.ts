@@ -11,6 +11,7 @@ import { inspect } from "util";
 import { buildEndpointDescription } from "../../common/endpoint-descriptor";
 import { STORYTELLER_PLUG } from "../storyteller/name";
 import type { StorytellerHookDefinition } from "../storyteller/types";
+import { SectionName } from "../storyteller/types";
 import { StorytellerHookName } from "../storyteller/types";
 import type {
   ExpressPluginApiDefinition,
@@ -144,12 +145,26 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
     },
     hooks: [
       {
-        name: StorytellerHookName.arrangeStarted,
+        name: StorytellerHookName.sectionStarted,
         handler:
-          (valueObject: ExpressValueObject<ExpressMock<ExpressPluginApiDefinition<string, string>>>) => async () => {
-            valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router = Router();
-            logger.plugin(EXPRESS_PLUG, "routes cleared");
+          (valueObject: ExpressValueObject<ExpressMock<ExpressPluginApiDefinition<string, string>>>) =>
+          async (payload) => {
+            if (payload.sectionName === SectionName.arrange) {
+              valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router = Router();
+              logger.plugin(EXPRESS_PLUG, "routes cleared");
+            }
           },
+      },
+      {
+        name: StorytellerHookName.sectionFinished,
+        handler: (valueObject: ExpressValueObject<TExpressMock>) => async (payload) => {
+          if (payload.sectionName === SectionName.arrange) {
+            valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router.use(notFoundHandlerMiddleware);
+            logger.plugin(EXPRESS_PLUG, "global middleware added: not found handler");
+            valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router.use(errorHandlerMiddleware);
+            logger.plugin(EXPRESS_PLUG, "global middleware added: error handler");
+          }
+        },
       },
       {
         name: StorytellerHookName.storytellerCreated,
@@ -161,15 +176,6 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
             .getPlugin(EXPRESS_PLUG)
             .state.globalState.express.listen(config.port);
           logger.plugin(EXPRESS_PLUG, `plugin listening on port: ${config.port}`);
-        },
-      },
-      {
-        name: StorytellerHookName.arrangeFinished,
-        handler: (valueObject: ExpressValueObject<TExpressMock>) => async () => {
-          valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router.use(notFoundHandlerMiddleware);
-          logger.plugin(EXPRESS_PLUG, "global middleware added: not found handler");
-          valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router.use(errorHandlerMiddleware);
-          logger.plugin(EXPRESS_PLUG, "global middleware added: error handler");
         },
       },
       {
