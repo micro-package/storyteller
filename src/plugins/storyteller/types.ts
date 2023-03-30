@@ -96,7 +96,8 @@ export interface StorytellerState<
     storyId: string | null;
     sectionId: string | null;
     stepId: string | null;
-    storyName: string;
+    storyName: string | null;
+    stepName: string | null;
     ws?: {
       getWebsocket: () => Promise<WebSocket>;
     };

@@ -69,7 +69,8 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         storyId: null,
         sectionId: null,
         stepId: null,
-        storyName: "STORY_NAME_NOT_SET",
+        storyName: null,
+        stepName: null,
         ws: config.websocketUrl !== undefined ? initializeWebsocketConnection({ url: config.websocketUrl }) : undefined,
       },
       steps: [],
@@ -80,6 +81,8 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         const stepReference = { ...step, status: StorytellerStepStatus.created };
         const stepHandler = async (prevStepPromise: Promise<any>) => {
           await prevStepPromise;
+          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId = v4();
+          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName = stepReference.name;
           valueObject.getPlugin(STORYTELLER_PLUG).state.steps.push(stepReference);
           await valueObject.runHooks({
             name: StorytellerHookName.stepCreated,
@@ -103,6 +106,8 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                 step: stepReference as any,
               },
             });
+            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName = null;
+            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId = null;
           } catch (error) {
             stepReference.status = StorytellerStepStatus.errored;
             await valueObject.runHooks({
@@ -112,6 +117,8 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                 error,
               },
             });
+            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName = null;
+            valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId = null;
             throw error;
           }
         };
@@ -146,11 +153,13 @@ export const storytellerPlugin = <TStepName extends string>(config: {
             }
             valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName = storyName;
             try {
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId = v4();
               await valueObject.runHooks({
                 name: StorytellerHookName.storyStarted,
-                payload: { storyName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName },
+                payload: { storyName },
               });
               try {
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = v4();
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionStarted,
                   payload: {
@@ -164,6 +173,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     sectionName: SectionName.arrange,
                   },
                 });
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
               } catch (error) {
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionErrored,
@@ -172,9 +182,11 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     sectionName: SectionName.arrange,
                   },
                 });
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
                 throw error;
               }
               try {
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = v4();
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionStarted,
                   payload: {
@@ -188,6 +200,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     sectionName: SectionName.act,
                   },
                 });
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
               } catch (error) {
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionErrored,
@@ -196,9 +209,11 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     sectionName: SectionName.act,
                   },
                 });
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
                 throw error;
               }
               try {
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = v4();
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionStarted,
                   payload: {
@@ -212,6 +227,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     sectionName: SectionName.act,
                   },
                 });
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
               } catch (error) {
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionErrored,
@@ -220,18 +236,23 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     sectionName: SectionName.act,
                   },
                 });
+                valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
                 throw error;
               }
               await valueObject.runHooks({
                 name: StorytellerHookName.storyFinished,
               });
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId = null;
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName = null;
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesFinishedAmount += 1;
             } catch (error) {
-              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesErroredAmount += 1;
               await valueObject.runHooks({
                 name: StorytellerHookName.storyErrored,
                 payload: { error },
               });
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesErroredAmount += 1;
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId = null;
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName = null;
               throw error;
             } finally {
               //? This setImmediate makes storyteller to run if condition after the next story is triggered or now if no story was left to trigger. This way condition is met only if last story is finished.
@@ -270,7 +291,6 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                 .state.steps.filter((step) => step.status === StorytellerStepStatus.errored).length
             } errored: ${payload.error.message}`,
           );
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId = null;
         },
       },
       {
@@ -292,13 +312,11 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                 .state.steps.filter((step) => step.status === StorytellerStepStatus.errored).length
             } errored`,
           );
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId = null;
         },
       },
       {
         name: StorytellerHookName.stepStarted,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId = v4();
           logger.ascent(
             STORYTELLER_PLUG,
             `step started "${payload.step.name}" - ${
@@ -319,8 +337,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
       },
       {
         name: StorytellerHookName.sectionStarted,
-        handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = v4();
+        handler: () => async (payload) => {
           if (payload.sectionName === SectionName.arrange) {
             logger.ascent(STORYTELLER_PLUG, "section arrange started");
           } else if (payload.sectionName === SectionName.act) {
@@ -332,7 +349,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
       },
       {
         name: StorytellerHookName.sectionFinished,
-        handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
+        handler: () => async (payload) => {
           if (payload.sectionName === SectionName.arrange) {
             logger.descent(STORYTELLER_PLUG, "section arrange finished");
           } else if (payload.sectionName === SectionName.act) {
@@ -340,12 +357,11 @@ export const storytellerPlugin = <TStepName extends string>(config: {
           } else if (payload.sectionName === SectionName.assert) {
             logger.descent(STORYTELLER_PLUG, "section assert finished");
           }
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
         },
       },
       {
         name: StorytellerHookName.sectionErrored,
-        handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
+        handler: () => async (payload) => {
           if (payload.sectionName === SectionName.arrange) {
             logger.descent(STORYTELLER_PLUG, `section arrange errored: ${payload.error.message}`);
           } else if (payload.sectionName === SectionName.act) {
@@ -354,7 +370,6 @@ export const storytellerPlugin = <TStepName extends string>(config: {
             logger.plugin(STORYTELLER_PLUG, `section assert errored: ${payload.error.message}`);
             logger.descent(STORYTELLER_PLUG, SectionName.assert);
           }
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
         },
       },
       {
@@ -366,13 +381,11 @@ export const storytellerPlugin = <TStepName extends string>(config: {
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesStartedAmount
             } finished, ${valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storiesCreatedAmount} created`,
           );
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId = null;
         },
       },
       {
         name: StorytellerHookName.storyStarted,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId = v4();
           const defaultStates = cloneDeep(valueObject.getPlugin(STORYTELLER_PLUG).state.defaultStates);
           valueObject.plugins = valueObject.plugins.map((plugin) => {
             const defaultState = valueObject
@@ -407,7 +420,6 @@ export const storytellerPlugin = <TStepName extends string>(config: {
               payload.error.message
             }`,
           );
-          valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId = null;
         },
       },
       {
@@ -460,6 +472,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
                     stepId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId,
                     sectionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId,
+                    stepName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName,
                   },
                   createdAt: DateTime.now().toISO(),
                 },
