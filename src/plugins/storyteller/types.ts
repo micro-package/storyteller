@@ -52,38 +52,34 @@ export type StorytellerHookDefinition =
       {
         error: Error;
         step: StorytellerStep<string, StorytellerStepStatus.errored, ValueObject<Status.forged, any, any>>;
-        storyId: string;
       }
     >
   | HookDefinition<
       StorytellerHookName.stepFinished,
       {
         step: StorytellerStep<string, StorytellerStepStatus.finished, ValueObject<Status.forged, any, any>>;
-        storyId: string;
       }
     >
   | HookDefinition<
       StorytellerHookName.stepStarted,
       {
         step: StorytellerStep<string, StorytellerStepStatus.started, ValueObject<Status.forged, any, any>>;
-        storyId: string;
       }
     >
   | HookDefinition<
       StorytellerHookName.stepCreated,
       {
         step: StorytellerStep<string, StorytellerStepStatus.created, ValueObject<Status.forged, any, any>>;
-        storyId: string;
       }
     >
-  | HookDefinition<StorytellerHookName.storyStarted, { storyName: string; storyId: string }>
-  | HookDefinition<StorytellerHookName.storyErrored, { error: Error; storyId: string }>
-  | HookDefinition<StorytellerHookName.storyFinished, { storyId: string }>
+  | HookDefinition<StorytellerHookName.storyStarted, { storyName: string }>
+  | HookDefinition<StorytellerHookName.storyErrored, { error: Error }>
+  | HookDefinition<StorytellerHookName.storyFinished, {}>
   | HookDefinition<StorytellerHookName.storytellerCreated, {}>
-  | HookDefinition<StorytellerHookName.sectionStarted, { storyId: string; sectionName: SectionName }>
-  | HookDefinition<StorytellerHookName.sectionFinished, { storyId: string; sectionName: SectionName }>
-  | HookDefinition<StorytellerHookName.sectionErrored, { error: Error; storyId: string; sectionName: SectionName }>
-  | HookDefinition<StorytellerHookName.storytellerFinished, { storyId: string }>
+  | HookDefinition<StorytellerHookName.sectionStarted, { sectionName: SectionName }>
+  | HookDefinition<StorytellerHookName.sectionFinished, { sectionName: SectionName }>
+  | HookDefinition<StorytellerHookName.sectionErrored, { error: Error; sectionName: SectionName }>
+  | HookDefinition<StorytellerHookName.storytellerFinished, {}>
   | PrimaryHookDefinition<any>;
 
 export interface StorytellerState<
@@ -97,7 +93,9 @@ export interface StorytellerState<
     storiesStartedAmount: number;
     storiesFinishedAmount: number;
     storiesErroredAmount: number;
-    storyId: string;
+    storyId: string | null;
+    sectionId: string | null;
+    stepId: string | null;
     storyName: string;
     ws?: {
       getWebsocket: () => Promise<WebSocket>;
