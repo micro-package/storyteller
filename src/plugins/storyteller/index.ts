@@ -213,7 +213,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                   name: StorytellerHookName.sectionStarted,
                   payload: { sectionName: SectionName.assert },
                 });
-                await story.assert(proxiedActions);
+                await story.assert(valueObject.actions);
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionFinished,
                   payload: { sectionName: SectionName.act },
