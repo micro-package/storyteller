@@ -8,6 +8,7 @@ import type HTTPMethod from "http-method-enum";
 import type { DotNotation } from "../../common/dot-notation";
 import type { EXPRESS_PLUG } from "./name";
 import type { StorytellerHookDefinition } from "../storyteller/types";
+import type { HookDefinition } from "../../container/hook";
 
 export interface ExpressPluginApiDefinition<TApiName extends string, TEndpointName extends string> {
   apiName: TApiName;
@@ -53,8 +54,62 @@ export type ExpressMockPayload<TExpressMock extends ExpressMock<ExpressPluginApi
   ) => Promise<void> | void)[][];
 };
 
-export enum ExpressHookName {}
-export type ExpressHookDefinition = never;
+export enum ExpressHookName {
+  routesCleared = "routesCleared",
+  globalMiddlewareAdded = "globalMiddlewareAdded",
+  serverListening = "serverListening",
+  serverClosed = "serverClosed",
+  mockHandlerCreationStarted = "mockHandlerCreationStarted",
+  mockHandlerCreationFinished = "mockHandlerCreationFinished",
+  mockHandlerExecutionStarted = "mockHandlerExecutionStarted",
+  mockHandlerExecutionFinished = "mockHandlerExecutionFinished",
+  mockWithoutDefintitionFailed = "mockWithoutDefintitionFailed",
+  mockHandlersUsageExceeded = "mockHandlersUsageExceeded",
+}
+export type ExpressHookDefinition =
+  | HookDefinition<ExpressHookName.routesCleared, {}>
+  | HookDefinition<ExpressHookName.globalMiddlewareAdded, { middlewareName: string }>
+  | HookDefinition<ExpressHookName.serverListening, { port: number }>
+  | HookDefinition<ExpressHookName.serverClosed, {}>
+  | HookDefinition<
+      ExpressHookName.mockHandlerCreationStarted,
+      {
+        payload: ExpressMockPayload<any>;
+        mock: ExpressMockDefinitions<any> & { url: string };
+      }
+    >
+  | HookDefinition<
+      ExpressHookName.mockHandlerCreationFinished,
+      {
+        payload: ExpressMockPayload<any>;
+        mock: ExpressMockDefinitions<any> & { url: string };
+      }
+    >
+  | HookDefinition<
+      ExpressHookName.mockHandlerExecutionStarted,
+      {
+        payload: ExpressMockPayload<any>;
+        mock: ExpressMockDefinitions<any> & { url: string };
+        index: number;
+      }
+    >
+  | HookDefinition<
+      ExpressHookName.mockHandlerExecutionFinished,
+      {
+        payload: ExpressMockPayload<any>;
+        mock: ExpressMockDefinitions<any> & { url: string };
+        index: number;
+      }
+    >
+  | HookDefinition<ExpressHookName.mockWithoutDefintitionFailed, {}>
+  | HookDefinition<
+      ExpressHookName.mockHandlersUsageExceeded,
+      {
+        payload: ExpressMockPayload<any>;
+        mock: ExpressMockDefinitions<any> & { url: string };
+        index: number;
+      }
+    >;
 export interface ExpressState<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>> {
   mockDefinitions: (ExpressMockDefinitions<TExpressMock> & ExpressMockPayload<TExpressMock>)[];
   executions: ExpressMockExecution<TExpressMock>[];
@@ -64,6 +119,14 @@ export interface ExpressState<TExpressMock extends ExpressMock<ExpressPluginApiD
     router: Router;
   };
 }
+/**
+ *
+ *               logger.plugin(EXPRESS_PLUG, "routes cleared");
+            logger.plugin(EXPRESS_PLUG, "global middleware added: not found handler");
+            logger.plugin(EXPRESS_PLUG, "global middleware added: error handler");
+          logger.plugin(EXPRESS_PLUG, `plugin listening on port: ${config.port}`);
+          logger.plugin(EXPRESS_PLUG, "server closed");
+ */
 
 export interface ExpressActions<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>>
   extends PluginAction<string, any, any> {
