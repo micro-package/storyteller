@@ -21,8 +21,9 @@ export const buildMessage = (payload: OnErrorPayload | OnSuccessPayload | OnNonF
     "processingResult" in payload ? buildFunctionMessage(payload) : ""
   }`;
 
-export const loggerProxyHandler = (options: Options): ProxyHandler<any> => {
-  return interceptor({
+export const loggerProxyHandler = (options: Options): ProxyHandler<any> =>
+  interceptor({
+    onBefore: () => {},
     onError: (payload) => {
       logger[options.loggerLevel]("interceptor", buildMessage(payload, options));
     },
@@ -31,4 +32,3 @@ export const loggerProxyHandler = (options: Options): ProxyHandler<any> => {
     },
     onNonFunction: () => {},
   });
-};

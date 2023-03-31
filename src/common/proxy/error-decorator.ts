@@ -10,6 +10,7 @@ export const buildMessage = (payload: OnErrorPayload, options: Options) =>
 
 export const errorDecoratorProxyHandler = (options: Options) =>
   interceptor({
+    onBefore: () => {},
     onSuccess: () => {},
     onNonFunction: () => {},
     onError: (payload) => {
