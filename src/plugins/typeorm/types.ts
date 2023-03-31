@@ -3,10 +3,13 @@ import type { DataSource } from "typeorm";
 import type { StorytellerHookDefinition } from "../storyteller/types";
 import type { TYPEORM_PLUG } from "./name";
 import type { Status, ValueObject } from "../../container/value-object";
+import type { HookDefinition } from "../../container/hook";
 
-export enum TypeormHookName {}
+export enum TypeormHookName {
+  chainAppended = "chainAppended",
+}
 
-export type TypeormHookDefinition = never;
+export type TypeormHookDefinition = HookDefinition<TypeormHookName.chainAppended, {}>;
 
 export interface TypeormDataSource<TDataSourceName extends string> {
   name: TDataSourceName;

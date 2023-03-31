@@ -22,6 +22,7 @@ import type {
   ExpressPlugin,
   ExpressValueObject,
 } from "./types";
+import { ExpressHookName } from "./types";
 
 const notFoundHandlerMiddleware: RequestHandler = async (req, res) => {
   logger.plugin(
@@ -49,11 +50,11 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
     ? ExpressMockDefinitions<UExpressMock>
     : never)[];
 }) => {
-  const nonUniquePluginNames = config.mockDefinitions
+  const nonUniqueEndpointNames = config.mockDefinitions
     .map(({ endpointName }) => endpointName)
     .filter((e, i, a) => a.indexOf(e) !== i);
-  if (nonUniquePluginNames.length > 0) {
-    throw errorPlugin("mock definitions endpoint name must be unique in each definition", nonUniquePluginNames);
+  if (nonUniqueEndpointNames.length > 0) {
+    throw errorPlugin("mock definitions endpoint name must be unique in each definition", nonUniqueEndpointNames);
   }
   return createPlugin<
     typeof EXPRESS_PLUG,
@@ -83,19 +84,15 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
           payload?.apiDefinition ||
           config.mockDefinitions.find(({ endpointName: mockName }) => mockName === payload.endpointName);
         if (mockDefinition === undefined) {
+          await valueObject.runHooks({ name: ExpressHookName.mockWithoutDefintitionFailed });
           throw errorPlugin("missing mock definition");
         }
         const mock = {
           ...mockDefinition,
           url: `${new URL(mockDefinition.url).origin}/${mockDefinition.apiName}${new URL(mockDefinition.url).pathname}`,
         };
-        logger.plugin(
-          EXPRESS_PLUG,
-          `mock creation started - ${payload.handlers.length} executions ${buildEndpointDescription({
-            ...mock,
-            url: `http://localhost:${config.port}`,
-          })}`,
-        );
+        await valueObject.runHooks({ name: ExpressHookName.mockHandlerCreationStarted, payload: { payload, mock } });
+
         let index = 0;
         valueObject
           .getPlugin(EXPRESS_PLUG)
@@ -103,12 +100,15 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
             new URL(mock.url).pathname,
             ...payload.handlers[index].slice(0, -1),
             async (req, res, next) => {
-              logger.plugin(
-                EXPRESS_PLUG,
-                `execution started ${index + 1}/${payload.handlers.length} ${buildEndpointDescription(mock)}`,
-              );
+              await valueObject.runHooks({
+                name: ExpressHookName.mockHandlerExecutionStarted,
+                payload: { payload, mock, index },
+              });
               if (index >= payload.handlers.length) {
-                logger.error(EXPRESS_PLUG, "handlers usage exceeded");
+                await valueObject.runHooks({
+                  name: ExpressHookName.mockHandlersUsageExceeded,
+                  payload: { payload, mock, index },
+                });
                 res
                   .status(StatusCodes.IM_A_TEAPOT)
                   .send({ message: "handlers usage exceeded", lastIndex: index, payload });
@@ -116,10 +116,10 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
                 const handler = payload.handlers[index][payload.handlers[index].length - 1];
                 await handler(req, res, next);
               }
-              logger.plugin(
-                EXPRESS_PLUG,
-                `execution finished ${index + 1}/${payload.handlers.length} ${buildEndpointDescription(mock)}`,
-              );
+              await valueObject.runHooks({
+                name: ExpressHookName.mockHandlerExecutionFinished,
+                payload: { payload, mock, index },
+              });
               valueObject.getPlugin(EXPRESS_PLUG).state.executions.push({ ...mock, response: res, request: req });
               index += 1;
             },
@@ -128,10 +128,7 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
           handlers: payload.handlers,
           ...mock,
         });
-        logger.plugin(
-          EXPRESS_PLUG,
-          `mocked creation finished - ${payload.handlers.length} executions ${buildEndpointDescription(mock)}`,
-        );
+        await valueObject.runHooks({ name: ExpressHookName.mockHandlerCreationFinished, payload: { payload, mock } });
       },
     },
     state: {
@@ -151,7 +148,7 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
           async (payload) => {
             if (payload.sectionName === SectionName.arrange) {
               valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router = Router();
-              logger.plugin(EXPRESS_PLUG, "routes cleared");
+              await valueObject.runHooks({ name: ExpressHookName.routesCleared });
             }
           },
       },
@@ -160,9 +157,15 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
         handler: (valueObject: ExpressValueObject<TExpressMock>) => async (payload) => {
           if (payload.sectionName === SectionName.arrange) {
             valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router.use(notFoundHandlerMiddleware);
-            logger.plugin(EXPRESS_PLUG, "global middleware added: not found handler");
+            await valueObject.runHooks({
+              name: ExpressHookName.globalMiddlewareAdded,
+              payload: { middlewareName: notFoundHandlerMiddleware.name },
+            });
             valueObject.getPlugin(EXPRESS_PLUG).state.globalState.router.use(errorHandlerMiddleware);
-            logger.plugin(EXPRESS_PLUG, "global middleware added: error handler");
+            await valueObject.runHooks({
+              name: ExpressHookName.globalMiddlewareAdded,
+              payload: { middlewareName: errorHandlerMiddleware.name },
+            });
           }
         },
       },
@@ -175,14 +178,89 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
           valueObject.getPlugin(EXPRESS_PLUG).state.globalState.server = valueObject
             .getPlugin(EXPRESS_PLUG)
             .state.globalState.express.listen(config.port);
-          logger.plugin(EXPRESS_PLUG, `plugin listening on port: ${config.port}`);
+          await valueObject.runHooks({ name: ExpressHookName.serverListening, payload: { port: config.port } });
         },
       },
       {
         name: StorytellerHookName.storytellerFinished,
         handler: (valueObject: ExpressValueObject<TExpressMock>) => async () => {
           valueObject.getPlugin(EXPRESS_PLUG).state.globalState.server.close();
+          await valueObject.runHooks({ name: ExpressHookName.serverClosed });
+        },
+      },
+      {
+        name: ExpressHookName.routesCleared,
+        handler: () => async () => {
+          logger.plugin(EXPRESS_PLUG, "routes cleared");
+        },
+      },
+      {
+        name: ExpressHookName.globalMiddlewareAdded,
+        handler: () => async (payload) => {
+          logger.plugin(EXPRESS_PLUG, `global middleware added: ${payload.middlewareName}`);
+        },
+      },
+      {
+        name: ExpressHookName.serverListening,
+        handler: () => async (payload) => {
+          logger.plugin(EXPRESS_PLUG, `plugin listening on port: ${payload.port}`);
+        },
+      },
+      {
+        name: ExpressHookName.serverClosed,
+        handler: () => async () => {
           logger.plugin(EXPRESS_PLUG, "server closed");
+        },
+      },
+      {
+        name: ExpressHookName.mockHandlerCreationStarted,
+        handler: () => async (payload) => {
+          logger.plugin(
+            EXPRESS_PLUG,
+            `mock creation started - ${payload.payload.handlers.length} executions ${buildEndpointDescription({
+              ...payload.mock,
+              url: `http://localhost:${config.port}`,
+            })}`,
+          );
+        },
+      },
+      {
+        name: ExpressHookName.mockHandlerCreationFinished,
+        handler: () => async (payload) => {
+          logger.plugin(
+            EXPRESS_PLUG,
+            `mocked creation finished - ${payload.payload.handlers.length} executions ${buildEndpointDescription(
+              payload.mock,
+            )}`,
+          );
+        },
+      },
+      {
+        name: ExpressHookName.mockHandlerExecutionStarted,
+        handler: () => async (payload) => {
+          logger.plugin(
+            EXPRESS_PLUG,
+            `execution started ${payload.index + 1}/${payload.payload.handlers.length} ${buildEndpointDescription(
+              payload.mock,
+            )}`,
+          );
+        },
+      },
+      {
+        name: ExpressHookName.mockHandlerExecutionFinished,
+        handler: () => async (payload) => {
+          logger.plugin(
+            EXPRESS_PLUG,
+            `execution finished ${payload.index + 1}/${payload.payload.handlers.length} ${buildEndpointDescription(
+              payload.mock,
+            )}`,
+          );
+        },
+      },
+      {
+        name: ExpressHookName.mockHandlersUsageExceeded,
+        handler: () => async () => {
+          logger.error(EXPRESS_PLUG, "handlers usage exceeded");
         },
       },
     ],
