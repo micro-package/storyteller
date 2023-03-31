@@ -70,6 +70,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         storiesErroredAmount: 0,
         //TODO test id's and name's
         pluginActionId: null,
+        pluginActionName: null,
         storyId: null,
         sectionId: null,
         stepId: null,
@@ -85,15 +86,18 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         const stepReference = { ...step, status: StorytellerStepStatus.created };
         const proxiedActions = applyProxies(valueObject.actions, [
           interceptor({
-            onBefore: () => {
+            onBefore: (payload) => {
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = v4();
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName = payload.fieldValue;
             },
             onError: () => {
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = null;
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName = null;
             },
             onNonFunction: () => {},
             onSuccess: () => {
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = null;
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName = null;
             },
           }),
         ]);
@@ -459,6 +463,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     stepId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId,
                     sectionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId,
                     pluginActionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId,
+                    pluginActionName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName,
                     stepName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName,
                   },
                   createdAt: DateTime.now().toISO(),
