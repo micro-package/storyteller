@@ -96,6 +96,7 @@ export interface StorytellerState<
     storyId: string | null;
     sectionId: string | null;
     stepId: string | null;
+    pluginActionName: string | null;
     pluginActionId: string | null;
     storyName: string | null;
     stepName: string | null;
