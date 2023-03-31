@@ -173,7 +173,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                   name: StorytellerHookName.sectionStarted,
                   payload: { sectionName: SectionName.arrange },
                 });
-                await story.arrange(proxiedActions);
+                await story.arrange(valueObject.actions);
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionFinished,
                   payload: { sectionName: SectionName.arrange },
@@ -193,7 +193,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                   name: StorytellerHookName.sectionStarted,
                   payload: { sectionName: SectionName.act },
                 });
-                await story.act(proxiedActions);
+                await story.act(valueObject.actions);
                 await valueObject.runHooks({
                   name: StorytellerHookName.sectionFinished,
                   payload: { sectionName: SectionName.act },
