@@ -19,6 +19,7 @@ import { PrimaryHookName } from "../../container/hook";
 import { secureJsonStringify } from "../../common/parser/secure-json";
 import { v4 } from "uuid";
 import { DateTime } from "luxon";
+import { applyProxies } from "../../common/proxy/common";
 import { interceptor } from "generic-interceptor";
 
 export const testRunnerNameGetters: TestRunnerNameGetters[] = [
@@ -82,6 +83,20 @@ export const storytellerPlugin = <TStepName extends string>(config: {
     actions: {
       storytellerCreateStep: (valueObject: StorytellerValueObject<TStepName>) => (step) => {
         const stepReference = { ...step, status: StorytellerStepStatus.created };
+        const proxiedActions = applyProxies(valueObject.actions, [
+          interceptor({
+            onBefore: () => {
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = v4();
+            },
+            onError: () => {
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = null;
+            },
+            onNonFunction: () => {},
+            onSuccess: () => {
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = null;
+            },
+          }),
+        ]);
         const stepHandler = async (prevStepPromise: Promise<any>) => {
           await prevStepPromise;
           valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId = v4();
@@ -97,7 +112,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
             payload: { step: stepReference as any },
           });
           try {
-            await step.handler(valueObject.actions);
+            await step.handler(proxiedActions);
             stepReference.status = StorytellerStepStatus.finished;
             await valueObject.runHooks({
               name: StorytellerHookName.stepFinished,
@@ -146,21 +161,6 @@ export const storytellerPlugin = <TStepName extends string>(config: {
               throw errorPlugin("story name couldn`t be received from test runner");
             }
             try {
-              const proxiedActions = new Proxy(
-                valueObject.actions,
-                interceptor({
-                  onBefore: () => {
-                    valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = v4();
-                  },
-                  onError: () => {
-                    valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = null;
-                  },
-                  onNonFunction: () => {
-                    valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = null;
-                  },
-                  onSuccess: () => {},
-                }),
-              );
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyName = storyName;
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId = v4();
               await valueObject.runHooks({
@@ -458,6 +458,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
                     stepId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId,
                     sectionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId,
+                    pluginActionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId,
                     stepName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName,
                   },
                   createdAt: DateTime.now().toISO(),
