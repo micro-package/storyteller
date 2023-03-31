@@ -473,7 +473,6 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     pluginActionArguments:
                       valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionArguments,
                     stepName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName,
-                    context,
                   },
                   createdAt: DateTime.now().toISO(),
                 },
