@@ -71,6 +71,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         //TODO test id's and name's
         pluginActionId: null,
         pluginActionName: null,
+        pluginActionArguments: null,
         storyId: null,
         sectionId: null,
         stepId: null,
@@ -89,15 +90,20 @@ export const storytellerPlugin = <TStepName extends string>(config: {
             onBefore: (payload) => {
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = v4();
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName = payload.fieldValue;
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionArguments = JSON.stringify(
+                payload.functionArgs,
+              );
             },
             onError: () => {
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = null;
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName = null;
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionArguments = null;
             },
             onNonFunction: () => {},
             onSuccess: () => {
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId = null;
               valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName = null;
+              valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionArguments = null;
             },
           }),
         ]);
@@ -464,7 +470,10 @@ export const storytellerPlugin = <TStepName extends string>(config: {
                     sectionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId,
                     pluginActionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId,
                     pluginActionName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName,
+                    pluginActionArguments:
+                      valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionArguments,
                     stepName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName,
+                    context,
                   },
                   createdAt: DateTime.now().toISO(),
                 },
