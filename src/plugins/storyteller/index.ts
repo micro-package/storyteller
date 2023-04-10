@@ -50,6 +50,7 @@ const initializeWebsocketConnection = (config: { url: string }) => {
   };
 };
 const executionId = v4();
+let hookIndex = 0;
 
 export const storytellerPlugin = <TStepName extends string>(config: {
   testRunnerGetTestName?: TestRunnerNameGetters;
@@ -454,31 +455,33 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         name: PrimaryHookName.beforeHook,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
           const websocket = await valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.ws?.getWebsocket();
-          if (websocket !== undefined) {
-            //TODO make service usage optional (store events locally an if connection established send them)
-            websocket.send(
-              secureJsonStringify({
-                eventName: "storytellerHookBefore",
-                eventPayload: {
-                  executionId,
-                  hookName: payload.name,
-                  hookPayload: {
-                    ...payload.payload,
-                    //TODO move them to the eventPaylod root and put as nullable columns into database
-                    storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
-                    stepId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId,
-                    sectionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId,
-                    pluginActionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId,
-                    pluginActionName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName,
-                    pluginActionArguments:
-                      valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionArguments,
-                    stepName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName,
-                  },
-                  createdAt: DateTime.now().toISO(),
-                },
-              }),
-            );
+          if (websocket === undefined) {
+            return;
           }
+          //TODO make service usage optional (store events locally an if connection established send them)
+          websocket.send(
+            secureJsonStringify({
+              eventName: "storytellerHookBefore",
+              eventPayload: {
+                executionId,
+                hookName: payload.name,
+                hookPayload: {
+                  ...payload.payload,
+                  //TODO move them to the eventPaylod root and put as nullable columns into database
+                  hookIndex,
+                  storyId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.storyId,
+                  stepId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepId,
+                  sectionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.sectionId,
+                  pluginActionId: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionId,
+                  pluginActionName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionName,
+                  pluginActionArguments:
+                    valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.pluginActionArguments,
+                  stepName: valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.stepName,
+                },
+                createdAt: DateTime.now().toISO(),
+              },
+            }),
+          );
         },
       },
     ],
