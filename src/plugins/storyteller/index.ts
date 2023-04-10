@@ -455,6 +455,7 @@ export const storytellerPlugin = <TStepName extends string>(config: {
         name: PrimaryHookName.beforeHook,
         handler: (valueObject: StorytellerValueObject<TStepName>) => async (payload) => {
           const websocket = await valueObject.getPlugin(STORYTELLER_PLUG).state.globalState.ws?.getWebsocket();
+          hookIndex += 1;
           if (websocket === undefined) {
             return;
           }
