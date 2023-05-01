@@ -91,6 +91,8 @@ export type ExpressHookDefinition =
         payload: ExpressMockPayload<any>;
         mock: ExpressMockDefinitions<any> & { url: string };
         index: number;
+        req: Request;
+        res: Response;
       }
     >
   | HookDefinition<
@@ -99,6 +101,8 @@ export type ExpressHookDefinition =
         payload: ExpressMockPayload<any>;
         mock: ExpressMockDefinitions<any> & { url: string };
         index: number;
+        req: Request;
+        res: Response;
       }
     >
   | HookDefinition<ExpressHookName.mockWithoutDefintitionFailed, {}>
@@ -108,6 +112,8 @@ export type ExpressHookDefinition =
         payload: ExpressMockPayload<any>;
         mock: ExpressMockDefinitions<any> & { url: string };
         index: number;
+        req: Request;
+        res: Response;
       }
     >;
 export interface ExpressState<TExpressMock extends ExpressMock<ExpressPluginApiDefinition<string, string>>> {

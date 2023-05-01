@@ -4,12 +4,25 @@ import type { StorytellerHookDefinition } from "../storyteller/types";
 import type { TYPEORM_PLUG } from "./name";
 import type { Status, ValueObject } from "../../container/value-object";
 import type { HookDefinition } from "../../container/hook";
-
+import type { QueryRunner } from "typeorm";
 export enum TypeormHookName {
   chainAppended = "chainAppended",
+  ormLogged = "ormLogged",
 }
 
-export type TypeormHookDefinition = HookDefinition<TypeormHookName.chainAppended, {}>;
+export type TypeormHookDefinition =
+  | HookDefinition<TypeormHookName.chainAppended, {}>
+  | HookDefinition<
+      TypeormHookName.ormLogged,
+      (
+        | { name: "log"; query: string; parameters?: any[] }
+        | { name: "logMigration"; message: string }
+        | { name: "logQuery"; query: string; parameters?: any[] | undefined }
+        | { name: "logQueryError"; error: string | Error; query: string; parameters?: any[] | undefined }
+        | { name: "logQuerySlow"; time: number; query: string; parameters?: any[] | undefined }
+        | { name: "logSchemaBuild"; message: string }
+      ) & { dataSourceName: string; queryRunner?: QueryRunner }
+    >;
 
 export interface TypeormDataSource<TDataSourceName extends string> {
   name: TDataSourceName;
