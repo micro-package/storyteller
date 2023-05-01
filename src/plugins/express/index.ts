@@ -102,12 +102,12 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
             async (req, res, next) => {
               await valueObject.runHooks({
                 name: ExpressHookName.mockHandlerExecutionStarted,
-                payload: { payload, mock, index },
+                payload: { payload, mock, index, req, res },
               });
               if (index >= payload.handlers.length) {
                 await valueObject.runHooks({
                   name: ExpressHookName.mockHandlersUsageExceeded,
-                  payload: { payload, mock, index },
+                  payload: { payload, mock, index, req, res },
                 });
                 res
                   .status(StatusCodes.IM_A_TEAPOT)
@@ -118,7 +118,7 @@ export const expressPlugin = <TExpressMock extends ExpressMock<ExpressPluginApiD
               }
               await valueObject.runHooks({
                 name: ExpressHookName.mockHandlerExecutionFinished,
-                payload: { payload, mock, index },
+                payload: { payload, mock, index, req, res },
               });
               valueObject.getPlugin(EXPRESS_PLUG).state.executions.push({ ...mock, response: res, request: req });
               index += 1;

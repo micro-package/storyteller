@@ -13,6 +13,7 @@ import type {
   TypeormPlugin,
   TypeormValueObject,
 } from "./types";
+import { TypeormPluginLogger } from "./logger";
 
 export const typeormPlugin = <TDataSourceName extends string>(config: {
   dataSources: TypeormDataSource<TDataSourceName>[];
@@ -80,7 +81,11 @@ export const typeormPlugin = <TDataSourceName extends string>(config: {
           const connections = await Promise.allSettled(
             valueObject
               .getPlugin(TYPEORM_PLUG)
-              .state.globalState.dataSources.map((container) => container.dataSource.initialize()),
+              .state.globalState.dataSources.map((dataSource) =>
+                dataSource.dataSource
+                  .setOptions({ logger: new TypeormPluginLogger(valueObject, dataSource) })
+                  .initialize(),
+              ),
           );
           connections.forEach((connection, index) =>
             logger.plugin(
