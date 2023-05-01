@@ -46,15 +46,13 @@
 // };
 
 // describe("parser/secure-json", () => {
-//   it("build-replacement-string", () => {
-//     const test = prepare({});
-
-//     const result = test.executeBuildReplacementString();
-
-//     expect(result).toStrictEqual(
-//       `_${test.dataset.reason}_<${typeof test.dataset.fieldValue}>${test.dataset.fieldKey}_`,
-//     );
-//   });
+it("build-replacement-string", () => {
+  // const test = prepare({});
+  // const result = test.executeBuildReplacementString();
+  // expect(result).toStrictEqual(
+  //   `_${test.dataset.reason}_<${typeof test.dataset.fieldValue}>${test.dataset.fieldKey}_`,
+  // );
+});
 
 //   it("secure-replacer", () => {
 //     const test = prepare({});
