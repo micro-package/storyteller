@@ -2,15 +2,22 @@ export const buildReplacementString = (reason: "SECURE" | "CIRCULAR", key: strin
   `_${reason}_<${typeof value}>${key}_`;
 
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value
-export const getCircularReplacer = (seen: WeakSet<object>) => (key: string, value: unknown) => {
-  if (typeof value === "object" && value !== null) {
-    if (seen.has(value)) {
+export function getCircularReplacer() {
+  const ancestors: any[] = [];
+  return function (key: any, value: any) {
+    if (typeof value !== "object" || value === null) {
+      return value;
+    }
+    while (ancestors.length > 0 && ancestors[ancestors.length - 1] !== this) {
+      ancestors.pop();
+    }
+    if (ancestors.includes(value)) {
       return buildReplacementString("CIRCULAR", key, value);
     }
-    seen.add(value);
-  }
-  return value;
-};
+    ancestors.push(value);
+    return value;
+  };
+}
 
 const securedKeys: string[] = [];
 
@@ -27,13 +34,14 @@ export const js2SecureJson = (secureReplacer: any, circularReplacer: any) => (ob
     return result;
   } catch {
     // eslint-disable-next-line no-restricted-globals
-    return JSON.stringify(object, (key, value) =>
-      [circularReplacer, secureReplacer].reduce((acc, replacer) => replacer(key, acc), value),
-    );
+    const result = JSON.stringify(object, function (key, value) {
+      return [circularReplacer, secureReplacer].reduce((acc, replacer) => replacer.bind(this)(key, acc), value);
+    });
+    return result;
   }
 };
 
-export const secureJsonStringify = js2SecureJson(getSecureReplacer(securedKeys), getCircularReplacer(new WeakSet()));
+export const secureJsonStringify = js2SecureJson(getSecureReplacer(securedKeys), getCircularReplacer());
 
 // eslint-disable-next-line no-restricted-globals
 export const secureJsonParse = JSON.parse;
